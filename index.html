@@ -82,11 +82,21 @@
     const params = new URLSearchParams(location.search);
     state.shuffleSides = params.get('shuffle') !== 'false';
 
+		// Base-aware URL resolver (works for /<repo>/ paths on GitHub Pages)
+		function toURL(p) {
+		  // Allow full URLs to pass through
+		  if (/^(https?:)?\/\//i.test(p)) return p;
+		  // Strip a leading slash so it doesn't jump to domain root on project pages
+		  const clean = p.replace(/^\//, '');
+		  return new URL(clean, document.baseURI).toString();
+		}
+
+
     start();
 
     async function start(){
       try{
-        const res = await fetch('images/manifest.json', { cache: 'no-store' });
+        const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
         if(!res.ok) throw new Error('Could not load images/manifest.json');
         /** manifest shape:
          * { "animals": { "real": ["..."], "ai": ["..."] }, "landscapes": { "real":[...], "ai":[...] }, ... }
