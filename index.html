@@ -112,48 +112,40 @@
     }
 
     // Turn the categorized manifest into a list of rounds without repeats, pairing within the same category.
-    function buildRoundsFromCategorizedManifest(m){
-      /** Each round: { category, images: [{src,label,alt},{src,label,alt}] } */
-      const categories = Object.keys(m);
-      const rounds = [];
-      for(const cat of categories){
-        const real = Array.isArray(m[cat]?.real) ? [...m[cat].real] : [];
-        const ai = Array.isArray(m[cat]?.ai) ? [...m[cat].ai] : [];
-        // shuffle both lists to avoid bias
-        shuffle(real); shuffle(ai);
-        const n = Math.min(real.length, ai.length);
-        for(let k=0;k<n;k++){
-          const realFile = real[k];
-          const aiFile = ai[k];
-            rounds.push({
+      function resolveSrc(entry, label) {
+          const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
+          // If it's already a full URL or starts with images/ or /
+          if (/^(https?:)?\/\//i.test(v)) return v;
+          if (v.startsWith('images/') || v.startsWith('/')) return v.replace(/^\//, '');
+          // Otherwise assume it's just a filename
+          const folder = label === 'ai' ? 'images/ai' : 'images/real';
+          return `${folder}/${v}`;
+      }
 
-            category: cat,
-              function resolveSrc(entry, label){
-                  // If the manifest entry is an object like {file:"x.jpg"} or a plain string
-                  const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
-                  // If it already looks like a URL or starts with "images/" or "/", use as-is
-                  if(/^ (https ?:) ?\/\//i.test(v) || v.startsWith('images/') || v.startsWith('/')) return v;
-              // Otherwise, treat it as a bare filename and prepend the folder by label
-              const folder = label === 'ai' ? 'images/ai' : 'images/real';
-              return `${folder}/${v}`;
+      function buildRoundsFromCategorizedManifest(m) {
+          const categories = Object.keys(m);
+          const rounds = [];
+          for (const cat of categories) {
+              const real = Array.isArray(m[cat]?.real) ? [...m[cat].real] : [];
+              const ai = Array.isArray(m[cat]?.ai) ? [...m[cat].ai] : [];
+              shuffle(real); shuffle(ai);
+              const n = Math.min(real.length, ai.length);
+              for (let k = 0; k < n; k++) {
+                  const realFile = real[k];
+                  const aiFile = ai[k];
+                  rounds.push({
+                      category: cat,
+                      images: [
+                          { src: resolveSrc(realFile, 'real'), label: 'real', alt: autoAlt(realFile.file || realFile.src || realFile) },
+                          { src: resolveSrc(aiFile, 'ai'), label: 'ai', alt: autoAlt(aiFile.file || aiFile.src || aiFile) }
+                      ]
+                  });
+              }
           }
+          shuffle(rounds);
+          return rounds;
+      }
 
-          });
-        }
-        }
-
-        rounds.push({
-            category: cat,
-            images: [
-                { src: resolveSrc(realFile, 'real'), label: 'real', alt: autoAlt(realFile.file || realFile.src || realFile) },
-                { src: resolveSrc(aiFile, 'ai'), label: 'ai', alt: autoAlt(aiFile.file || aiFile.src || aiFile) }
-            ]
-        });
-
-      // Mix categories so gameplay feels varied
-      shuffle(rounds);
-      return rounds;
-    }
 
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
     function autoAlt(filename){ return String(filename).split('/').pop().replace(/\.[a-z0-9]+$/i,'').replace(/[-_]/g,' '); }
