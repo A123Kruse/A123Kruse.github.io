@@ -125,15 +125,31 @@
         for(let k=0;k<n;k++){
           const realFile = real[k];
           const aiFile = ai[k];
-          rounds.push({
+            rounds.push({
+
             category: cat,
-            images: [
-              { src: `images/real/${realFile}`, label: 'real', alt: autoAlt(realFile) },
-              { src: `images/ai/${aiFile}`,   label: 'ai',   alt: autoAlt(aiFile) }
-            ]
+              function resolveSrc(entry, label){
+                  // If the manifest entry is an object like {file:"x.jpg"} or a plain string
+                  const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
+                  // If it already looks like a URL or starts with "images/" or "/", use as-is
+                  if(/^ (https ?:) ?\/\//i.test(v) || v.startsWith('images/') || v.startsWith('/')) return v;
+              // Otherwise, treat it as a bare filename and prepend the folder by label
+              const folder = label === 'ai' ? 'images/ai' : 'images/real';
+              return `${folder}/${v}`;
+          }
+
           });
         }
-      }
+        }
+
+        rounds.push({
+            category: cat,
+            images: [
+                { src: resolveSrc(realFile, 'real'), label: 'real', alt: autoAlt(realFile.file || realFile.src || realFile) },
+                { src: resolveSrc(aiFile, 'ai'), label: 'ai', alt: autoAlt(aiFile.file || aiFile.src || aiFile) }
+            ]
+        });
+
       // Mix categories so gameplay feels varied
       shuffle(rounds);
       return rounds;
