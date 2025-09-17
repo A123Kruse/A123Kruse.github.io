@@ -92,18 +92,20 @@
             }
 
             // --- 🔧 MANIFEST ENTRY → IMAGE SRC ---
-            function resolveSrc(entry, label) {
-                // support: "cat.jpg" | "images/real/cat.jpg" | {file:"…"} | {src:"…"} | full URL
+            function resolveSrc(entry, label, category) {
                 const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
                 if (!v) return '';
-                // full URL stays; absolute/relative path goes through toURL for proper base
+                // Full URLs stay; absolute/relative paths go through unchanged (but base-aware if you use toURL)
                 if (/^(https?:)?\/\//i.test(v)) return v;
-                if (v.startsWith('/')) return toURL(v);            // "/images/real/x.jpg" → base-aware
-                if (v.startsWith('images/')) return toURL(v);      // "images/real/x.jpg" → base-aware
-                // otherwise it's just a filename; prepend by label
+                if (v.startsWith('/')) return v.replace(/^\//, '');          // e.g., "/images/real/animals/doggy.jpg"
+                if (v.startsWith('images/')) return v;                       // e.g., "images/real/animals/doggy.jpg"
+                if (v.includes('/')) return v;                               // e.g., "animals/doggy.jpg" (already has a subfolder)
+                // Otherwise it’s just "doggy.jpg" → insert category folder
                 const folder = label === 'ai' ? 'images/ai' : 'images/real';
-                return toURL(`${folder}/${v}`);
+                const catPart = category ? `/${category}` : '';
+                return `${folder}${catPart}/${v}`;
             }
+
 
             function autoAlt(filename) {
                 const s = typeof filename === 'string' ? filename : (filename?.file ?? filename?.src ?? '');
@@ -126,10 +128,11 @@
                         rounds.push({
                             category: cat,
                             images: [
-                                { src: resolveSrc(rEnt, 'real'), label: 'real', alt: autoAlt(rEnt) },
-                                { src: resolveSrc(aEnt, 'ai'), label: 'ai', alt: autoAlt(aEnt) }
+                                { src: resolveSrc(real[k], 'real', cat), label: 'real', alt: autoAlt(real[k]) },
+                                { src: resolveSrc(ai[k], 'ai', cat), label: 'ai', alt: autoAlt(ai[k]) }
                             ]
                         });
+
                     }
                 }
                 shuffle(rounds);
