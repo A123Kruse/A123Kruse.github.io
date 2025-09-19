@@ -7,9 +7,7 @@
   <style>
     :root{--bg:#0b0f14;--card:#121923;--muted:#8aa0b7;--text:#e6eef6;--accent:#6ea8fe;--win:#19c37d;--ring:#263245}
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,#0b0f14,#0e1620 40%,#0b0f14);display:flex;align-items:center;justify-content:center;padding:24px}
-    .app{max-width:1100px;width:100%}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    
     .title{font-weight:800;font-size:clamp(20px,2vw+8px,28px)}
     .meta{display:flex;gap:10px;color:var(--muted);font-size:14px}
     .pill{background:rgba(255,255,255,.06);padding:6px 10px;border:1px solid var(--ring);border-radius:999px}
@@ -17,13 +15,12 @@
     .link:hover{transform:translateY(-1px)}
     .bar{height:8px;background:#0a121a;border-radius:999px;overflow:hidden;border:1px solid var(--ring);margin-bottom:10px}
     .bar>div{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#9bd2ff);transition:width .35s}
-    .board{background:rgba(255,255,255,.04);border:1px solid var(--ring);border-radius:16px;padding:16px}
+    
     .cards{display:grid;grid-template-columns:1fr;gap:16px}
     @media (min-width:820px){.cards{grid-template-columns:1fr 1fr}}
     .card{position:relative;background:#121923;border:1px solid var(--ring);border-radius:14px;overflow:hidden;outline:none;transition:.15s}
     .card:hover{transform:translateY(-2px)} .card:focus-visible{box-shadow:0 0 0 3px rgba(110,168,254,.5)}
-    .frame{aspect-ratio:4/3;display:grid;place-items:center;background:#0c141d}
-    .frame img{width:100%;height:100%;object-fit:cover;display:block}
+    
     .label{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.5);border:1px solid var(--ring);font-size:12px;text-transform:uppercase}
     .pick{position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:10px;pointer-events:none}
     .pick .btn{pointer-events:all;flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--ring);background:rgba(255,255,255,.06);color:var(--text);font-weight:700;cursor:pointer}
@@ -84,12 +81,12 @@
           overflow: hidden; /* crop oversized content */
       }
 
-          .frame img {
-              max-width: 100%; /* prevent overflow horizontally */
-              max-height: 100%; /* prevent overflow vertically */
-              object-fit: contain; /* keep whole image visible */
-              display: block;
-          }
+      .frame img {
+          max-width: 100%; /* prevent overflow horizontally */
+          max-height: 100%; /* prevent overflow vertically */
+          object-fit: contain; /* keep whole image visible */
+          display: block;
+      }
 
   </style>
 </head>
