@@ -40,37 +40,22 @@
     }
     .cta:hover{ transform:translateY(-2px) }
 
-    /* Code-drawn preview of two image cards */
-    .preview{
-      display:grid; gap:16px;
-    }
-    .cards{
-      display:grid; grid-template-columns:1fr 1fr; gap:16px;
-    }
-    .card{
-      position:relative; background:var(--card); border:1px solid var(--ring); border-radius:14px; overflow:hidden;
-    }
-    .label{
-      position:absolute; top:10px; left:10px; padding:6px 10px; border-radius:999px;
-      background:rgba(0,0,0,.5); border:1px solid var(--ring); font-size:12px; text-transform:uppercase;
-    }
-    .frame{
-      aspect-ratio:4/3;
-      background:
-        radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 30%, transparent 31%),
-        radial-gradient(circle at 70% 60%, rgba(255,255,255,.06) 0 26%, transparent 27%),
-        linear-gradient(180deg, #0e1620, #0b1119);
-      border-bottom:1px solid var(--ring);
-    }
+    /* Preview cards */
+    .preview{ display:grid; gap:16px; }
+    .cards{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .card{ position:relative; background:var(--card); border:1px solid var(--ring); border-radius:14px; overflow:hidden; }
+    .label{ position:absolute; top:10px; left:10px; padding:6px 10px; border-radius:999px;
+      background:rgba(0,0,0,.5); border:1px solid var(--ring); font-size:12px; text-transform:uppercase; }
+    .frame{ aspect-ratio:4/3;
+      background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 30%, transparent 31%),
+                 radial-gradient(circle at 70% 60%, rgba(255,255,255,.06) 0 26%, transparent 27%),
+                 linear-gradient(180deg, #0e1620, #0b1119);
+      border-bottom:1px solid var(--ring); }
     .ghost{ position:absolute; right:10px; bottom:10px; font-size:12px; color:var(--muted) }
 
-    .howto{
-      margin-top:22px; display:grid; gap:16px;
-    }
+    .howto{ margin-top:22px; display:grid; gap:16px; }
     @media (min-width:700px){ .howto{ grid-template-columns: repeat(3, 1fr); } }
-    .step{
-      background:rgba(255,255,255,.04); border:1px solid var(--ring); border-radius:14px; padding:16px;
-    }
+    .step{ background:rgba(255,255,255,.04); border:1px solid var(--ring); border-radius:14px; padding:16px; }
     .step h3{ margin:0 0 8px; font-size:16px }
     .kbd{ font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding:2px 6px; border-radius:6px; border:1px solid var(--ring); background:#0c141d }
 
@@ -84,6 +69,7 @@
         <div class="brand">AI or Real?</div>
         <div class="sub">A quick game to test whether you can spot AI-generated images.</div>
       </div>
+      <!-- Main CTA still starts the game -->
       <a class="cta" href="game.html">Start the Game</a>
     </header>
 
@@ -107,12 +93,13 @@
           </div>
         </div>
 
+        <!-- Secondary CTA now points to categories.html -->
         <p style="margin-top:18px">
-          <a class="cta" href="game.html">Start the Game</a>
+          <a class="cta" href="categories.html">Categories Explained</a>
         </p>
       </div>
 
-      <!-- visual preview (no external images needed) -->
+      <!-- visual preview -->
       <div class="preview" aria-hidden="true">
         <div class="cards">
           <div class="card">
