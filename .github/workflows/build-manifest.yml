@@ -1,0 +1,45 @@
+name: Build manifest.json
+
+on:
+  push:
+    branches: [ main ]   # ← adjust if you push to a different branch
+  workflow_dispatch:
+
+permissions:
+  contents: write        # ← REQUIRED for committing back to the repo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # get full history so we can diff
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate manifest
+        run: node build_manifest.js
+
+      - name: Show manifest head (debug)
+        run: |
+          echo "::group::manifest.json head"
+          head -n 50 images/manifest.json || true
+          echo "::endgroup::"
+
+      - name: Show git status and diff (debug)
+        run: |
+          git status --porcelain
+          # Diff against HEAD; exit 0 so the job still continues
+          git diff -- images/manifest.json || true
+
+      - name: Commit manifest if changed
+        if: "contains(github.event.head_commit.message, '[skip-manifest]') == false"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: rebuild images/manifest.json"
+          file_pattern: images/manifest.json
