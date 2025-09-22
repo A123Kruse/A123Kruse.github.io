@@ -138,6 +138,47 @@
       "zebra lady ai.webp"
     ]
   },
+  "Surrealism": {
+    "real": [
+      "25ce0ab9830a101b18da8dcda02833e3.jpg",
+      "55b8f7d21400002f002e13f7.webp",
+      "55b8f93b1700002500565e56.webp",
+      "55b90af51d0000300014328c.webp",
+      "55b91a141700002600565ed3.webp",
+      "55b91f0b1700002600565eea.webp",
+      "55b926bd1700002600565f00.webp",
+      "55b938741700002500565f4d.webp",
+      "A_Melting_Clock_in_The_Persistence_of_Memory_by_Salvador_Dali_ec8dc9c5-755d-4708-b3a3-ee29c6f45ba2_2000x.webp",
+      "L-Ange-du-Foyer-ou-le-Triomphe-du-Surrealisme-Max-Ernst.jpg.webp",
+      "Mama-Papa-is-Wounded.jpg.webp",
+      "Object-Le-Dejeuner-en-fourrure-Meret-Oppenheim.png.webp",
+      "Pedestal-Table-in-the-Studio-Andre-Masson.jpg.webp",
+      "The-Seer-Giorgio-de-Chirico.jpg.webp",
+      "Untitled-Rayograph-Man-Ray.jpg.webp",
+      "self-portrait-with-Grilled-Bacon-Salvador-Dali.jpg.webp",
+      "son-of-man-797x1024.jpg.webp"
+    ],
+    "ai": [
+      "bike.webp",
+      "birds.webp",
+      "eye.webp",
+      "field.webp",
+      "galaxy head.png",
+      "hour glass.webp",
+      "house head.webp",
+      "liminal space.png",
+      "mars.webp",
+      "mirror world.webp",
+      "ps5 game about surrealism.webp",
+      "shrooms 2.webp",
+      "shrooms.webp",
+      "slide.webp",
+      "surrealist 1.webp",
+      "swing.webp",
+      "the prompt name is complete giberish lol.webp",
+      "we have slenderman at home.webp"
+    ]
+  },
   "Anime Fanart": {
     "real": [],
     "ai": [
@@ -166,29 +207,6 @@
       "theres two of him ai.webp",
       "vaporeon.webp",
       "why are there so many gender swap ai.webp"
-    ]
-  },
-  "Surrealism": {
-    "real": [],
-    "ai": [
-      "bike.webp",
-      "birds.webp",
-      "eye.webp",
-      "field.webp",
-      "galaxy head.png",
-      "hour glass.webp",
-      "house head.webp",
-      "liminal space.png",
-      "mars.webp",
-      "mirror world.webp",
-      "ps5 game about surrealism.webp",
-      "shrooms 2.webp",
-      "shrooms.webp",
-      "slide.webp",
-      "surrealist 1.webp",
-      "swing.webp",
-      "the prompt name is complete giberish lol.webp",
-      "we have slenderman at home.webp"
     ]
   }
 }
