@@ -112,5 +112,26 @@
       "ai sunflower.jpg",
       "solid fake.jpg"
     ]
+  },
+  "People": {
+    "real": [
+      "Screenshot 2025-09-18 143944.png",
+      "beach family.png",
+      "brick guy stock photo.jpg",
+      "corn dog man stock photo.jpeg",
+      "cosplay girl.jpg",
+      "drink.jpg",
+      "ears.jpg",
+      "family photo.jpg",
+      "fish.jpg",
+      "jack-sparrow-cosplay-v0-facq7wyyx5nf1.jpg",
+      "kcoamf1gixpf1.jpg",
+      "my-alice-cooper-closet-cosplay-self-portraits-v0-oeeu45w66spf1.jpg",
+      "my-strawhat-luffy-cosplay-arlong-park-v0-emy7wb9xyvpf1.jpg",
+      "my-take-on-knuckles-v0-49fkvsj51qpf1.jpg",
+      "park.jpg",
+      "they really dont want to be here.jpg"
+    ],
+    "ai": []
   }
 }
