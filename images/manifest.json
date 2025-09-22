@@ -1,4 +1,34 @@
 {
+  "Animals": {
+    "real": [
+      "bear.png",
+      "between some rocks.png",
+      "big bite.png",
+      "birbs.png",
+      "borbs.png",
+      "cute pupper.jpg",
+      "dog in a shirt.jpg",
+      "dogger.jpg",
+      "doggo.jpg",
+      "doggy.jpg",
+      "dogs on a walk.jpg",
+      "fox.png",
+      "happy dog.jpg",
+      "happy doggo.jpg",
+      "k9.jpg",
+      "kitties.jpg",
+      "lazy kitty.jpg",
+      "lynx floofy.png",
+      "lynx.png",
+      "ninu.png",
+      "pupper with a cone.jpg",
+      "rocks.png",
+      "sad doggo.jpg",
+      "sus dog.jpg",
+      "white dog.jpg"
+    ],
+    "ai": []
+  },
   "Furries": {
     "real": [
       "comic furry.png",
