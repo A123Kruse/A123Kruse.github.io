@@ -93,50 +93,6 @@
       "solid fake.webp"
     ]
   },
-  "People": {
-    "real": [
-      "Screenshot 2025-09-18 143944.png",
-      "angels.webp",
-      "beach family.png",
-      "brick guy stock photo.jpeg",
-      "corn dog man stock photo.jpeg",
-      "cosplay girl.webp",
-      "drink.jpg",
-      "ears.webp",
-      "family photo.jpg",
-      "fish.webp",
-      "jack-sparrow-cosplay-v0-facq7wyyx5nf1.webp",
-      "kcoamf1gixpf1.jpeg",
-      "kid flexing i think.jpeg",
-      "mullet.jpeg",
-      "my-alice-cooper-closet-cosplay-self-portraits-v0-oeeu45w66spf1.webp",
-      "my-strawhat-luffy-cosplay-arlong-park-v0-emy7wb9xyvpf1.webp",
-      "my-take-on-knuckles-v0-49fkvsj51qpf1.webp",
-      "park.webp",
-      "they really dont want to be here.webp"
-    ],
-    "ai": [
-      "ai busness men.webp",
-      "ai feast.webp",
-      "ai fighter.webp",
-      "ai girl 1.webp",
-      "ai girl 2.webp",
-      "ai girl bed.webp",
-      "ai girl.webp",
-      "ai goth.webp",
-      "ai grandma.webp",
-      "ai guy building.jpg",
-      "ai kinght girl.webp",
-      "ai pool.png",
-      "ai sword girl.jpg",
-      "girl 1.webp",
-      "girl 2.webp",
-      "girl 3.webp",
-      "guy.webp",
-      "monster.webp",
-      "overwatch.webp"
-    ]
-  },
   "Surrealism": {
     "real": [
       "25ce0ab9830a101b18da8dcda02833e3.jpg",
@@ -206,6 +162,30 @@
       "theres two of him ai.webp",
       "vaporeon.webp",
       "why are there so many gender swap ai.webp"
+    ]
+  },
+  "People": {
+    "real": [],
+    "ai": [
+      "ai busness men.webp",
+      "ai feast.webp",
+      "ai fighter.webp",
+      "ai girl 1.webp",
+      "ai girl 2.webp",
+      "ai girl bed.webp",
+      "ai girl.webp",
+      "ai goth.webp",
+      "ai grandma.webp",
+      "ai guy building.jpg",
+      "ai kinght girl.webp",
+      "ai pool.png",
+      "ai sword girl.jpg",
+      "girl 1.webp",
+      "girl 2.webp",
+      "girl 3.webp",
+      "guy.webp",
+      "monster.webp",
+      "overwatch.webp"
     ]
   }
 }
