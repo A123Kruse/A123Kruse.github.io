@@ -1,57 +1,4 @@
 {
-  "Animals": {
-    "real": [
-      "bear.png",
-      "between some rocks.png",
-      "big bite.png",
-      "birbs.png",
-      "borbs.png",
-      "cute pupper.webp",
-      "dog in a shirt.webp",
-      "dogger.webp",
-      "doggo.webp",
-      "doggy.webp",
-      "dogs on a walk.webp",
-      "fox.png",
-      "happy dog.webp",
-      "happy doggo.webp",
-      "k9.webp",
-      "kitties.webp",
-      "lazy kitty.webp",
-      "lynx (2).png",
-      "lynx.png",
-      "ninu.png",
-      "pupper with a cone.webp",
-      "rocks.png",
-      "sad doggo.webp",
-      "sus dog.webp",
-      "white dog.webp"
-    ],
-    "ai": []
-  },
-  "Art I Might Be Able To Find At Home Goods": {
-    "real": [
-      "Pinklomein leaf hair.png",
-      "Rebecca Perry Flower 2.jpg",
-      "Rebecca Perry Flower.webp",
-      "Siva Kami Harison UFO.jpg",
-      "angels marshals.png",
-      "golden girls home goods.jpg",
-      "kitty tjmaxx.png",
-      "low effort surrealism tjmaxx.png",
-      "marshals flowers.png",
-      "ode to lemonchello tjmaxx.png",
-      "pinklomein cloud hair.webp",
-      "rose marshals.png",
-      "shoes tjmaxx.png",
-      "straight up ass its even discounted on the website tjmaxx.png",
-      "the bar is so fucking low at this point marshals.png",
-      "vogue marshals.png",
-      "wine marshals.png",
-      "yellow lady marshals.png"
-    ],
-    "ai": []
-  },
   "Furries": {
     "real": [
       "comic furry.png",
@@ -76,49 +23,5 @@
       "ai sunflower.jpg",
       "solid fake.jpg"
     ]
-  },
-  "People": {
-    "real": [
-      "Screenshot 2025-09-18 143944.png",
-      "angels.webp",
-      "beach family.png",
-      "brick guy stock photo.jpeg",
-      "corn dog man stock photo.jpeg",
-      "cosplay girl.jpg",
-      "drink.jpg",
-      "ears.jpg",
-      "family photo.jpg",
-      "fish.webp",
-      "jack-sparrow-cosplay-v0-facq7wyyx5nf1.webp",
-      "kcoamf1gixpf1.jpeg",
-      "my-alice-cooper-closet-cosplay-self-portraits-v0-oeeu45w66spf1.jpg",
-      "my-strawhat-luffy-cosplay-arlong-park-v0-emy7wb9xyvpf1.jpg",
-      "my-take-on-knuckles-v0-49fkvsj51qpf1.webp",
-      "park.jpg",
-      "they really dont want to be here.webp"
-    ],
-    "ai": []
-  },
-  "Surrealism": {
-    "real": [
-      "25ce0ab9830a101b18da8dcda02833e3.jpg",
-      "55b8f7d21400002f002e13f7.webp",
-      "55b8f93b1700002500565e56.webp",
-      "55b90af51d0000300014328c.webp",
-      "55b91a141700002600565ed3.webp",
-      "55b91f0b1700002600565eea.webp",
-      "55b926bd1700002600565f00.webp",
-      "55b938741700002500565f4d.webp",
-      "A_Melting_Clock_in_The_Persistence_of_Memory_by_Salvador_Dali_ec8dc9c5-755d-4708-b3a3-ee29c6f45ba2_2000x.webp",
-      "L-Ange-du-Foyer-ou-le-Triomphe-du-Surrealisme-Max-Ernst.jpg.webp",
-      "Mama-Papa-is-Wounded.jpg.webp",
-      "Object-Le-Dejeuner-en-fourrure-Meret-Oppenheim.png.webp",
-      "Pedestal-Table-in-the-Studio-Andre-Masson.jpg.webp",
-      "The-Seer-Giorgio-de-Chirico.jpg.webp",
-      "Untitled-Rayograph-Man-Ray.jpg.webp",
-      "self-portrait-with-Grilled-Bacon-Salvador-Dali.jpg.webp",
-      "son-of-man-797x1024.jpg.webp"
-    ],
-    "ai": []
   }
 }
