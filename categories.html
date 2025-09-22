@@ -198,22 +198,20 @@
           body.appendChild(meta);
 
           // Actions
-          const actions = document.createElement('div'); actions.className='actions';
-          const playBtn = document.createElement('a');
-          playBtn.className='btn';
-          playBtn.href = `game.html?cat=${encodeURIComponent(cat)}`; // optional param
-          playBtn.textContent = 'Play this category';
-          const allBtn = document.createElement('a');
-          allBtn.className='btn';
-          allBtn.href = 'game.html';
-          allBtn.textContent = 'Play all';
-          actions.appendChild(playBtn);
-          actions.appendChild(allBtn);
+            const actions = document.createElement('div');
+            actions.className = 'actions';
 
-          card.appendChild(thumb);
-          card.appendChild(body);
-          card.appendChild(actions);
-          fr.appendChild(card);
+            const playBtn = document.createElement('a');
+            playBtn.className = 'btn';
+            playBtn.href = `game.html?cat=${encodeURIComponent(cat)}`;
+            playBtn.textContent = 'Play this category';
+
+            actions.appendChild(playBtn);
+
+            card.appendChild(thumb);
+            card.appendChild(body);
+            card.appendChild(actions);
+
         });
         grid.innerHTML = '';
         grid.appendChild(fr);
