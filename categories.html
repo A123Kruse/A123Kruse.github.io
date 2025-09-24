@@ -243,7 +243,24 @@
 
                     // Fetch the text file and set description (async, per-card)
                     fetchDescription(cat).then(text => {
-                        desc.innerHTML = text ? esc(text) : 'No description yet.';
+                        
+                        const descCache = new Map();
+                        async function fetchDescription(cat) {
+                            const slug = slugifyCategory(cat);
+                            const url = toURL(`descriptions/${slug}.txt`);
+                            if (descCache.has(url)) return descCache.get(url);
+
+                            const p = fetch(url, { cache: 'no-store' })
+                                .then(async r => {
+                                    if (r.ok) return (await r.text()).trim();
+                                    // surface a helpful message
+                                    return '';
+                                })
+                                .catch(() => '');
+                            descCache.set(url, p);
+                            return p;
+                        }
+
                     });
                 });
 
