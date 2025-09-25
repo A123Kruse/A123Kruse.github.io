@@ -1,181 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI or Real? — Categories</title>
-  <style>
-      <link rel="stylesheet" href="styles/site.css" >
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI or Real? — Categories</title>
 
+    <!-- Shared site-wide styles (fonts, tokens, base colors) -->
+    <link rel="stylesheet" href="styles/site.css">
 
-      :root {
-          --bg: #0b0f14;
-          --card: #121923;
-          --muted: #8aa0b7;
-          --text: #e6eef6;
-          --accent: #6ea8fe;
-          --ring: #263245;
-      }
+    <!-- Page-specific styles only -->
+    <style>
+        * {
+            box-sizing: border-box
+        }
 
-      * {
-          box-sizing: border-box
-      }
+        .wrap {
+            max-width: 1100px;
+            width: 100%
+        }
 
-      body {
-          margin: 0;
-          font-family: "Rewritten By Machine", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-          color: var(--text);
-          background: linear-gradient(180deg,#0b0f14,#0e1620 40%,#0b0f14);
-          padding: 28px;
-          display: flex;
-          justify-content: center;
-      }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px
+        }
 
-      h1, h2, h3, .brand, .cta, .btn, .link {
-          font-family: "Neon AI", system-ui, sans-serif;
-      }
+        .brand {
+            font-weight: 800;
+            font-size: clamp(22px,2.5vw+10px,40px)
+        }
 
-      .wrap {
-          max-width: 1100px;
-          width: 100%
-      }
+        .sub {
+            color: var(--muted);
+            margin-top: 6px
+        }
 
-      header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          margin-bottom: 20px;
-      }
+        .links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
 
-      .brand {
-          font-weight: 800;
-          font-size: clamp(22px,2.5vw+10px,40px)
-      }
+        .link {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--ring);
+            text-decoration: none;
+            color: var(--text);
+            background: linear-gradient(180deg,#172031,#121a28);
+            transition: .12s
+        }
 
-      .sub {
-          color: var(--muted);
-          margin-top: 6px
-      }
+            .link:hover {
+                transform: translateY(-1px)
+            }
 
-      .links {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap
-      }
+        .grid {
+            display: grid;
+            gap: 18px;
+            margin-top: 18px
+        }
 
-      .link {
-          padding: 10px 14px;
-          border-radius: 12px;
-          border: 1px solid var(--ring);
-          text-decoration: none;
-          color: var(--text);
-          background: linear-gradient(180deg,#172031,#121a28);
-          transition: .12s ease;
-      }
+        @media (min-width:720px) {
+            .grid {
+                grid-template-columns: repeat(2,1fr)
+            }
+        }
 
-          .link:hover {
-              transform: translateY(-1px)
-          }
+        @media (min-width:1050px) {
+            .grid {
+                grid-template-columns: repeat(3,1fr)
+            }
+        }
 
-      .grid {
-          display: grid;
-          gap: 18px;
-          margin-top: 18px;
-      }
+        .card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--ring);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column
+        }
 
-      @media (min-width:720px) {
-          .grid {
-              grid-template-columns: repeat(2,1fr);
-          }
-      }
+        .thumb {
+            aspect-ratio: 4/3;
+            background: #0c141d;
+            display: grid;
+            place-items: center;
+            border-bottom: 1px solid var(--ring)
+        }
 
-      @media (min-width:1050px) {
-          .grid {
-              grid-template-columns: repeat(3,1fr);
-          }
-      }
+            .thumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block
+            }
 
-      .card {
-          background: rgba(255,255,255,.04);
-          border: 1px solid var(--ring);
-          border-radius: 16px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-      }
+            .thumb .placeholder {
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(circle at 30% 35%,rgba(255,255,255,.08) 0 30%,transparent 31%),radial-gradient(circle at 70% 60%,rgba(255,255,255,.06) 0 26%,transparent 27%),linear-gradient(180deg,#0e1620,#0b1119)
+            }
 
-      .thumb {
-          aspect-ratio: 4 / 3;
-          background: #0c141d;
-          display: grid;
-          place-items: center;
-          border-bottom: 1px solid var(--ring);
-      }
+        .body {
+            padding: 14px 14px 12px
+        }
 
-          .thumb img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-              display: block;
-          }
+        .title {
+            font-weight: 800;
+            font-size: 18px;
+            margin: 0 0 6px
+        }
 
-          .thumb .placeholder {
-              width: 100%;
-              height: 100%;
-              background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 30%, transparent 31%), radial-gradient(circle at 70% 60%, rgba(255,255,255,.06) 0 26%, transparent 27%), linear-gradient(180deg, #0e1620, #0b1119);
-          }
+        .meta {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 10px
+        }
 
-      .body {
-          padding: 14px 14px 12px
-      }
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+            padding: 0 14px 14px
+        }
 
-      .title {
-          font-weight: 800;
-          font-size: 18px;
-          margin: 0 0 6px
-      }
+        .btn {
+            display: inline-block;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--ring);
+            background: linear-gradient(180deg,#172031,#121a28);
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 700
+        }
 
-      .meta {
-          color: var(--muted);
-          font-size: 14px;
-          margin-bottom: 10px
-      }
+            .btn:hover {
+                transform: translateY(-1px)
+            }
 
-      .actions {
-          display: flex;
-          gap: 8px;
-          margin-top: auto;
-          padding: 0 14px 14px
-      }
+        .notice {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 10px
+        }
 
-      .btn {
-          display: inline-block;
-          padding: 10px 12px;
-          border-radius: 10px;
-          border: 1px solid var(--ring);
-          background: linear-gradient(180deg,#172031,#121a28);
-          color: var(--text);
-          text-decoration: none;
-          font-weight: 700;
-      }
-
-          .btn:hover {
-              transform: translateY(-1px)
-          }
-
-      .notice {
-          color: var(--muted);
-          font-size: 13px;
-          margin-top: 10px
-      }
-
-      .error {
-          color: #ffbdbd;
-          margin-top: 12px
-      }
-  </style>
+        .error {
+            color: #ffbdbd;
+            margin-top: 12px
+        }
+    </style>
 </head>
+
 <body>
     <div class="wrap">
         <header>
