@@ -5,18 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AI or Real? — Home</title>
   <style>
+      /*custom fonts*/
+      @font-face {
+          font-family: "Neon AI";
+          src: url("fonts/NeonAI-Regular.woff2") format("woff2"), url("fonts/NeonAI-Regular.ttf") format("truetype");
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+      }
+
+      @font-face {
+          font-family: "Rewritten By Machine";
+          src: url("fonts/RewrittenByMachine-Regular.woff2") format("woff2"), url("fonts/RewrittenByMachine-Regular.ttf") format("truetype");
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+      }
+
     :root{
       --bg:#0b0f14; --card:#121923; --muted:#8aa0b7; --text:#e6eef6; --accent:#6ea8fe; --ring:#263245; --win:#19c37d;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:'Neon AI' ,'Neon AI Italic','Rewritten By Machine';
-      color:var(--text);
-      background:linear-gradient(180deg,#0b0f14,#0e1620 40%,#0b0f14);
-      padding:28px;
-      display:flex; justify-content:center;
-    }
+      body {
+          margin: 0;
+          font-family: "Rewritten By Machine", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+          color: var(--text);
+          background: linear-gradient(180deg,#0b0f14,#0e1620 40%,#0b0f14);
+          padding: 28px;
+          display: flex;
+          justify-content: center;
+      }
+
+      h1, h2, h3, .brand, .cta, .btn, .link {
+          font-family: "Neon AI", system-ui, sans-serif;
+      }
+
     .wrap{max-width:1000px; width:100%}
 
     header{
