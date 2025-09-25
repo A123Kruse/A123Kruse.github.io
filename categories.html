@@ -158,185 +158,188 @@
 
 
 <body>
-    <div class="wrap">
-        <header>
-            <div>
-                <div class="brand">Categories</div>
-                <div class="sub">Auto-generated from your <code>images/manifest.json</code>.</div>
+    <div class="page-wrap">
+        <div class="app">
+            <div class="wrap">
+                <header>
+                    <div>
+                        <div class="brand">Categories</div>
+                        <div class="sub">Auto-generated from your <code>images/manifest.json</code>.</div>
+                    </div>
+                    <div class="links">
+                        <a class="link" href="index.html">← Home</a>
+                        <a class="link" href="game.html">Play All →</a>
+                    </div>
+                </header>
+
+                <div id="error" class="error"></div>
+
+                <section id="grid" class="grid" aria-live="polite">
+                    <!-- Cards injected by JS -->
+                </section>
+
+                <p class="notice">
+                    Tip: “Play this category” adds <code>?cat=&lt;name&gt;</code> to the game URL. If you want the game to filter by category, I can wire that up too; otherwise it’ll just start the normal game.
+                </p>
             </div>
-            <div class="links">
-                <a class="link" href="index.html">← Home</a>
-                <a class="link" href="game.html">Play All →</a>
-            </div>
-        </header>
 
-        <div id="error" class="error"></div>
+            <script>
+                (function () {
+                    const grid = document.getElementById('grid');
+                    const errEl = document.getElementById('error');
 
-        <section id="grid" class="grid" aria-live="polite">
-            <!-- Cards injected by JS -->
-        </section>
-
-        <p class="notice">
-            Tip: “Play this category” adds <code>?cat=&lt;name&gt;</code> to the game URL. If you want the game to filter by category, I can wire that up too; otherwise it’ll just start the normal game.
-        </p>
-    </div>
-
-    <script>
-        (function () {
-            const grid = document.getElementById('grid');
-            const errEl = document.getElementById('error');
-
-            // -------- Base-aware URL helper (important for GitHub Pages) --------
-            function toURL(p) {
-                if (/^(https?:)?\/\//i.test(p)) return p;
-                const clean = String(p).replace(/^\//, '');
-                return new URL(clean, document.baseURI).toString();
-            }
-
-            // -------- Resolve manifest entries to actual image URLs --------
-            function resolveSrc(entry, label, category) {
-                const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
-                if (!v) return '';
-                if (/^(https?:)?\/\//i.test(v)) return v;           // full URL
-                if (v.startsWith('/')) return toURL(v);
-                if (v.startsWith('images/')) return toURL(v);
-                if (v.includes('/')) return toURL(`images/${label}/${v}`); // e.g., "animals/dog.jpg"
-                const folder = label === 'ai' ? 'images/ai' : 'images/real';
-                const catPart = category ? `/${category}` : '';
-                return toURL(`${folder}${catPart}/${v}`);
-            }
-
-            // -------- Slugify category name to filename: descriptions/<slug>.txt --------
-            function slugifyCategory(cat) {
-                return String(cat)
-                    .toLowerCase()
-                    .replace(/[\s_]+/g, '-')       // spaces/underscores -> -
-                    .replace(/[^a-z0-9-]/g, '')    // remove other punctuation
-                    .replace(/-+/g, '-')           // collapse ---
-                    .replace(/^-|-$/g, '');        // trim -
-            }
-
-            // Minimal HTML escape (we're reading plain .txt)
-            function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-            // Cache fetched descriptions to avoid duplicate requests
-            const descCache = new Map();
-            async function fetchDescription(cat) {
-                const slug = slugifyCategory(cat);
-                const url = toURL(`descriptions/${slug}.txt`);
-                if (descCache.has(url)) return descCache.get(url);
-
-                const p = fetch(url, { cache: 'no-store' })
-                    .then(async r => {
-                        if (r.ok) return (await r.text()).trim();
-                        // surface a helpful message
-                        return '';
-                    })
-                    .catch(() => '');
-                descCache.set(url, p);
-                return p;
-            }
-
-
-            async function load() {
-                try {
-                    const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
-                    if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
-                    const manifest = await res.json();
-                    render(manifest);
-                } catch (e) {
-                    errEl.textContent = e.message;
-                    console.error(e);
-                }
-            }
-
-            function pickThumb(cat, bucket) {
-                if (Array.isArray(bucket.real) && bucket.real.length) return resolveSrc(bucket.real[0], 'real', cat);
-                if (Array.isArray(bucket.ai) && bucket.ai.length) return resolveSrc(bucket.ai[0], 'ai', cat);
-                return null;
-            }
-
-            function prettify(s) {
-                return String(s).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, m => m.toUpperCase());
-            }
-
-            function render(manifest) {
-                const cats = Object.keys(manifest || {}).sort((a, b) => a.localeCompare(b));
-                if (!cats.length) {
-                    grid.innerHTML = '<div class="sub">No categories found. Add images under <code>images/real/&lt;category&gt;/</code> and <code>images/ai/&lt;category&gt;/</code>.</div>';
-                    return;
-                }
-
-                const fr = document.createDocumentFragment();
-                cats.forEach(cat => {
-                    const bucket = manifest[cat] || {};
-                    const realCount = Array.isArray(bucket.real) ? bucket.real.length : 0;
-                    const aiCount = Array.isArray(bucket.ai) ? bucket.ai.length : 0;
-                    const total = realCount + aiCount;
-
-                    const card = document.createElement('article');
-                    card.className = 'card';
-                    card.setAttribute('aria-label', `${cat} — ${total} images`);
-
-                    // Thumb
-                    const thumb = document.createElement('div');
-                    thumb.className = 'thumb';
-                    const src = pickThumb(cat, bucket);
-                    if (src) {
-                        const img = document.createElement('img');
-                        img.src = src; img.alt = `${cat} preview`;
-                        img.onerror = () => { thumb.innerHTML = '<div class="placeholder" aria-hidden="true"></div>'; };
-                        thumb.appendChild(img);
-                    } else {
-                        const ph = document.createElement('div');
-                        ph.className = 'placeholder'; ph.setAttribute('aria-hidden', 'true');
-                        thumb.appendChild(ph);
+                    // -------- Base-aware URL helper (important for GitHub Pages) --------
+                    function toURL(p) {
+                        if (/^(https?:)?\/\//i.test(p)) return p;
+                        const clean = String(p).replace(/^\//, '');
+                        return new URL(clean, document.baseURI).toString();
                     }
 
-                    // Body
-                    const body = document.createElement('div'); body.className = 'body';
-                    const title = document.createElement('h2'); title.className = 'title'; title.textContent = prettify(cat);
-                    const meta = document.createElement('div'); meta.className = 'meta';
-                    meta.textContent = `Real: ${realCount} • AI: ${aiCount} • Total: ${total}`;
+                    // -------- Resolve manifest entries to actual image URLs --------
+                    function resolveSrc(entry, label, category) {
+                        const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
+                        if (!v) return '';
+                        if (/^(https?:)?\/\//i.test(v)) return v;           // full URL
+                        if (v.startsWith('/')) return toURL(v);
+                        if (v.startsWith('images/')) return toURL(v);
+                        if (v.includes('/')) return toURL(`images/${label}/${v}`); // e.g., "animals/dog.jpg"
+                        const folder = label === 'ai' ? 'images/ai' : 'images/real';
+                        const catPart = category ? `/${category}` : '';
+                        return toURL(`${folder}${catPart}/${v}`);
+                    }
 
-                    const desc = document.createElement('p'); // will be filled async
-                    desc.className = 'meta'; // same muted color
-                    desc.textContent = 'Loading description…';
+                    // -------- Slugify category name to filename: descriptions/<slug>.txt --------
+                    function slugifyCategory(cat) {
+                        return String(cat)
+                            .toLowerCase()
+                            .replace(/[\s_]+/g, '-')       // spaces/underscores -> -
+                            .replace(/[^a-z0-9-]/g, '')    // remove other punctuation
+                            .replace(/-+/g, '-')           // collapse ---
+                            .replace(/^-|-$/g, '');        // trim -
+                    }
 
-                    // Actions
-                    const actions = document.createElement('div'); actions.className = 'actions';
-                    const playBtn = document.createElement('a');
-                    playBtn.className = 'btn';
-                    playBtn.href = `game.html?cat=${encodeURIComponent(cat)}`;
-                    playBtn.textContent = 'Play this category';
+                    // Minimal HTML escape (we're reading plain .txt)
+                    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-                    actions.appendChild(playBtn);
-
-                    body.appendChild(title);
-                    body.appendChild(meta);
-                    body.appendChild(desc);
-
-                    card.appendChild(thumb);
-                    card.appendChild(body);
-                    card.appendChild(actions);
-                    fr.appendChild(card);
-
-                    // Fetch the text file and set description (async, per-card)
-                    fetchDescription(cat).then(text => {
+                    // Cache fetched descriptions to avoid duplicate requests
+                    const descCache = new Map();
+                    async function fetchDescription(cat) {
                         const slug = slugifyCategory(cat);
-                        desc.innerHTML = text
-                            ? esc(text)
-                            : `No description found. Add <code>descriptions/${slug}.txt</code>.`;
-                    });
-                });
+                        const url = toURL(`descriptions/${slug}.txt`);
+                        if (descCache.has(url)) return descCache.get(url);
 
-                grid.innerHTML = '';
-                grid.appendChild(fr);
-            }
+                        const p = fetch(url, { cache: 'no-store' })
+                            .then(async r => {
+                                if (r.ok) return (await r.text()).trim();
+                                // surface a helpful message
+                                return '';
+                            })
+                            .catch(() => '');
+                        descCache.set(url, p);
+                        return p;
+                    }
 
-            load();
-        })();
-    </script>
 
+                    async function load() {
+                        try {
+                            const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
+                            if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
+                            const manifest = await res.json();
+                            render(manifest);
+                        } catch (e) {
+                            errEl.textContent = e.message;
+                            console.error(e);
+                        }
+                    }
+
+                    function pickThumb(cat, bucket) {
+                        if (Array.isArray(bucket.real) && bucket.real.length) return resolveSrc(bucket.real[0], 'real', cat);
+                        if (Array.isArray(bucket.ai) && bucket.ai.length) return resolveSrc(bucket.ai[0], 'ai', cat);
+                        return null;
+                    }
+
+                    function prettify(s) {
+                        return String(s).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, m => m.toUpperCase());
+                    }
+
+                    function render(manifest) {
+                        const cats = Object.keys(manifest || {}).sort((a, b) => a.localeCompare(b));
+                        if (!cats.length) {
+                            grid.innerHTML = '<div class="sub">No categories found. Add images under <code>images/real/&lt;category&gt;/</code> and <code>images/ai/&lt;category&gt;/</code>.</div>';
+                            return;
+                        }
+
+                        const fr = document.createDocumentFragment();
+                        cats.forEach(cat => {
+                            const bucket = manifest[cat] || {};
+                            const realCount = Array.isArray(bucket.real) ? bucket.real.length : 0;
+                            const aiCount = Array.isArray(bucket.ai) ? bucket.ai.length : 0;
+                            const total = realCount + aiCount;
+
+                            const card = document.createElement('article');
+                            card.className = 'card';
+                            card.setAttribute('aria-label', `${cat} — ${total} images`);
+
+                            // Thumb
+                            const thumb = document.createElement('div');
+                            thumb.className = 'thumb';
+                            const src = pickThumb(cat, bucket);
+                            if (src) {
+                                const img = document.createElement('img');
+                                img.src = src; img.alt = `${cat} preview`;
+                                img.onerror = () => { thumb.innerHTML = '<div class="placeholder" aria-hidden="true"></div>'; };
+                                thumb.appendChild(img);
+                            } else {
+                                const ph = document.createElement('div');
+                                ph.className = 'placeholder'; ph.setAttribute('aria-hidden', 'true');
+                                thumb.appendChild(ph);
+                            }
+
+                            // Body
+                            const body = document.createElement('div'); body.className = 'body';
+                            const title = document.createElement('h2'); title.className = 'title'; title.textContent = prettify(cat);
+                            const meta = document.createElement('div'); meta.className = 'meta';
+                            meta.textContent = `Real: ${realCount} • AI: ${aiCount} • Total: ${total}`;
+
+                            const desc = document.createElement('p'); // will be filled async
+                            desc.className = 'meta'; // same muted color
+                            desc.textContent = 'Loading description…';
+
+                            // Actions
+                            const actions = document.createElement('div'); actions.className = 'actions';
+                            const playBtn = document.createElement('a');
+                            playBtn.className = 'btn';
+                            playBtn.href = `game.html?cat=${encodeURIComponent(cat)}`;
+                            playBtn.textContent = 'Play this category';
+
+                            actions.appendChild(playBtn);
+
+                            body.appendChild(title);
+                            body.appendChild(meta);
+                            body.appendChild(desc);
+
+                            card.appendChild(thumb);
+                            card.appendChild(body);
+                            card.appendChild(actions);
+                            fr.appendChild(card);
+
+                            // Fetch the text file and set description (async, per-card)
+                            fetchDescription(cat).then(text => {
+                                const slug = slugifyCategory(cat);
+                                desc.innerHTML = text
+                                    ? esc(text)
+                                    : `No description found. Add <code>descriptions/${slug}.txt</code>.`;
+                            });
+                        });
+
+                        grid.innerHTML = '';
+                        grid.appendChild(fr);
+                    }
+
+                    load();
+                })();
+            </script>
+        </div>
+    </div>
 </body>
 </html>

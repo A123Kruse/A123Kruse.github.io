@@ -159,61 +159,65 @@
 
 
 <body>
-    <div class="wrap">
-        <header>
-            <div>
-                <div class="brand">AI or Real?</div>
-                <div class="sub">A quick game to test whether you can spot AI-generated images.</div>
+    <div class="page-wrap">
+        <div class="app">
+            <div class="wrap">
+                <header>
+                    <div>
+                        <div class="brand">AI or Real?</div>
+                        <div class="sub">A quick game to test whether you can spot AI-generated images.</div>
+                    </div>
+                    <!-- Main CTA still starts the game -->
+                    <a class="cta" href="game.html">Start the Game</a>
+                </header>
+
+                <section class="hero">
+                    <div>
+                        <h2 style="margin:0 0 10px">How to play</h2>
+                        <p class="sub">You’ll see two images side-by-side. One is real, the other is AI-generated. Pick which one you think is AI.</p>
+
+                        <div class="howto">
+                            <div class="step">
+                                <h3>1) Look closely</h3>
+                                <p class="sub">Zoom in on details like text, fingers, backgrounds, and lighting.</p>
+                            </div>
+                            <div class="step">
+                                <h3>2) Make a call</h3>
+                                <p class="sub">Click the AI image — or use <span class="kbd">A</span>/<span class="kbd">B</span> to select.</p>
+                            </div>
+                            <div class="step">
+                                <h3>3) Reveal & score</h3>
+                                <p class="sub">Press <span class="kbd">R</span> to reveal, <span class="kbd">N</span> for next round. Try to beat your best score!</p>
+                            </div>
+                        </div>
+
+                        <!-- Secondary CTA now points to categories.html -->
+                        <p style="margin-top:18px">
+                            <a class="cta" href="categories.html">Categories Explained</a>
+                        </p>
+                    </div>
+
+                    <!-- visual preview -->
+                    <div class="preview" aria-hidden="true">
+                        <div class="cards">
+                            <div class="card">
+                                <div class="label">A</div>
+                                <div class="frame"></div>
+                                <div class="ghost">“This is AI”</div>
+                            </div>
+                            <div class="card">
+                                <div class="label">B</div>
+                                <div class="frame"></div>
+                                <div class="ghost">“This is AI”</div>
+                            </div>
+                        </div>
+                        <div class="sub">Example layout — actual images load in the game.</div>
+                    </div>
+                </section>
+
+                <footer>Tip: you can also use <span class="kbd">?shuffle=false</span> on the game page URL for testing left/right consistency.</footer>
             </div>
-            <!-- Main CTA still starts the game -->
-            <a class="cta" href="game.html">Start the Game</a>
-        </header>
-
-        <section class="hero">
-            <div>
-                <h2 style="margin:0 0 10px">How to play</h2>
-                <p class="sub">You’ll see two images side-by-side. One is real, the other is AI-generated. Pick which one you think is AI.</p>
-
-                <div class="howto">
-                    <div class="step">
-                        <h3>1) Look closely</h3>
-                        <p class="sub">Zoom in on details like text, fingers, backgrounds, and lighting.</p>
-                    </div>
-                    <div class="step">
-                        <h3>2) Make a call</h3>
-                        <p class="sub">Click the AI image — or use <span class="kbd">A</span>/<span class="kbd">B</span> to select.</p>
-                    </div>
-                    <div class="step">
-                        <h3>3) Reveal & score</h3>
-                        <p class="sub">Press <span class="kbd">R</span> to reveal, <span class="kbd">N</span> for next round. Try to beat your best score!</p>
-                    </div>
-                </div>
-
-                <!-- Secondary CTA now points to categories.html -->
-                <p style="margin-top:18px">
-                    <a class="cta" href="categories.html">Categories Explained</a>
-                </p>
-            </div>
-
-            <!-- visual preview -->
-            <div class="preview" aria-hidden="true">
-                <div class="cards">
-                    <div class="card">
-                        <div class="label">A</div>
-                        <div class="frame"></div>
-                        <div class="ghost">“This is AI”</div>
-                    </div>
-                    <div class="card">
-                        <div class="label">B</div>
-                        <div class="frame"></div>
-                        <div class="ghost">“This is AI”</div>
-                    </div>
-                </div>
-                <div class="sub">Example layout — actual images load in the game.</div>
-            </div>
-        </section>
-
-        <footer>Tip: you can also use <span class="kbd">?shuffle=false</span> on the game page URL for testing left/right consistency.</footer>
+        </div>
     </div>
 </body>
 </html>
