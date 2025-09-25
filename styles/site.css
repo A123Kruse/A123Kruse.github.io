@@ -1,78 +1,66 @@
 /* --- Design tokens shared across the site --- */
-:root{
-  --bg:#0b0f14;
-  --card:#121923;
-  --muted:#8aa0b7;
-  --text:#ffffff;           /* make site text white globally */
-  --accent:#6ea8fe;
-  --win:#19c37d;
-  --ring:#263245;
+:root {
+    --bg: #0b0f14;
+    --card: #121923;
+    --muted: #8aa0b7;
+    --text: #ffffff; /* site-wide text color */
+    --accent: #6ea8fe;
+    --win: #19c37d;
+    --ring: #263245;
 }
 
-/* Base look for all pages */
-html, body { height: 100%; }
-body{
-  margin:0;
-  color:var(--text);
-  background:linear-gradient(180deg,#0b0f14,#0e1620 40%,#0b0f14);
-  font-family:"Rewritten By Machine", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-}
-
-/* Headings / buttons use TechnoRace (italic face you added) */
-h1, h2, h3, .brand, .title, .pill, .btn-main, .cta, .btn, .link {
-  font-family:"TechnoRace", system-ui, sans-serif;
-  font-style: italic;
-}
-
-
-/* ---- Custom fonts ---- */
+/* --- Custom fonts --- */
 @font-face {
-  font-family: "TechnoRace";
-  src:
-    url("../fonts/TechnoRace-Italic.woff2") format("woff2"),
-    url("../fonts/TechnoRace-Italic.woff") format("woff"),
-    url("../fonts/TechnoRace-Italic.ttf") format("truetype"),
-    url("../fonts/TechnoRace-Italic.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;   /* because this file is italic */
-  font-display: swap;
+    font-family: "TechnoRace";
+    src: url("../fonts/TechnoRace-Italic.woff2") format("woff2"), url("../fonts/TechnoRace-Italic.woff") format("woff"), url("../fonts/TechnoRace-Italic.ttf") format("truetype"), url("../fonts/TechnoRace-Italic.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic; /* this file is italic */
+    font-display: swap;
 }
 
 @font-face {
-  font-family: "Rewritten By Machine";
-  src:
-    url("../fonts/RewrittenByMachine-Regular.woff2") format("woff2"),
-    url("../fonts/RewrittenByMachine-Regular.woff") format("woff"),
-    url("../fonts/RewrittenByMachine-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+    font-family: "Rewritten By Machine";
+    src: url("../fonts/RewrittenByMachine-Regular.woff2") format("woff2"), url("../fonts/RewrittenByMachine-Regular.woff") format("woff"), url("../fonts/RewrittenByMachine-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
-/* ---- Apply site-wide ---- */
+/* --- Global base styles --- */
+html, body {
+    height: 100%;
+}
+
 body {
-  font-family: "Rewritten By Machine", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-  color: #ffffff;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center; /* horizontally center content */
+    align-items: flex-start; /* default: stick to top (good for game page) */
+
+    color: var(--text);
+    background: linear-gradient(180deg, #0b0f14, #0e1620 40%, #0b0f14);
+    font-family: "Rewritten By Machine", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
 }
 
-h1, h2, h3, .brand, .title, .pill, .btn-main, .cta, .btn, .link {
-  font-family: "TechnoRace", system-ui, sans-serif;
-  font-style: italic; /* required to pick the TechnoRace-Italic face */
-}
-/* --- Shared page layout centering --- */
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;    /* full viewport height */
-  margin: 0;
+/* --- Typography rules --- */
+h1, h2, h3,
+.brand, .title, .pill, .btn-main, .cta, .btn, .link {
+    font-family: "TechnoRace", system-ui, sans-serif;
+    font-style: italic;
 }
 
-/* A wrapper that limits max width and adds padding */
+/* --- Shared page wrapper --- */
 .page-wrap {
-  width: 100%;
-  max-width: 1100px;    /* adjust as needed */
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
+    width: 100%;
+    max-width: 1100px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* --- Optional helper: full vertical centering --- */
+.center-y {
+    margin: auto; /* pushes wrapper to center vertically */
 }
