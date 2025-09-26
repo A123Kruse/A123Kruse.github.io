@@ -7,6 +7,8 @@
 
     <!-- Load shared site-wide styles (fonts, tokens, base colors) -->
     <link rel="stylesheet" href="styles/site.css">
+    <link rel="stylesheet" href="styles/progress.css">
+
 
     <!-- Page-only styles (what's unique to the game page) -->
     <style>
@@ -501,6 +503,15 @@
                         const pickedIsAI = r.images[selectedSrcIdx].label === 'ai';
                         const aiSrcIdx = r.images.findIndex(i => i.label === 'ai');
                         const aiVisualIdx = Number(el.cards.querySelector(`.card[data-src-index="${aiSrcIdx}"]`)?.dataset.visualIndex || 0);
+                        if (pickedIsAI) {
+                            state.score++;
+                            el.status.innerHTML = '<strong>Correct!</strong> You picked the AI image.';
+                            flashBar('win');   // ✅ green glow
+                        } else {
+                            el.status.innerHTML = '<strong>Not quite.</strong> The other image is AI.';
+                            flashBar('lose');  // ✅ red glow
+                        }
+
 
                         el.cards.querySelectorAll('.card').forEach(c => {
                             const overlay = c.querySelector('.reveal'); overlay.classList.add('show');

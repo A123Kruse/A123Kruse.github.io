@@ -1,0 +1,141 @@
+/* styles/progress.css
+   Animated progress bar for game.html
+*/
+
+/* Container */
+.bar {
+  position: relative;
+  height: 8px;
+  background: #0a121a;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--ring);
+  margin-bottom: 10px;
+}
+
+/* Fill element */
+.bar > div {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), #9bd2ff);
+  transition: width .45s cubic-bezier(.22,1,.36,1);
+  will-change: width;
+}
+
+/* Indeterminate barber-pole stripes */
+.bar::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,.09) 0 12px,
+      rgba(255,255,255,0)   12px 24px
+    );
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bar.loading::after {
+  opacity: 1;
+  animation: bar-scan 1s linear infinite;
+}
+
+@keyframes bar-scan {
+  to { transform: translateX(100%); }
+}
+
+/* Flash glow pulse on reveal */
+.bar.flash > div {
+  animation: bar-pulse .6s ease;
+}
+
+@keyframes bar-pulse {
+  0%   { filter: drop-shadow(0 0 0 rgba(25,195,125,0)); }
+  50%  { filter: drop-shadow(0 0 10px rgba(25,195,125,.7)); }
+  100% { filter: drop-shadow(0 0 0 rgba(25,195,125,0)); }
+}
+
+/* --- Flash glow pulses for correct vs. wrong --- */
+
+/* Correct (green) */
+.bar.flash-win > div {
+    animation: bar-pulse-win .6s ease;
+}
+
+@keyframes bar-pulse-win {
+    0% {
+        filter: drop-shadow(0 0 0 rgba(25,195,125,0));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 12px rgba(25,195,125,.9));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 0 rgba(25,195,125,0));
+    }
+}
+
+/* Wrong (red) */
+.bar.flash-lose > div {
+    animation: bar-pulse-lose .6s ease;
+}
+
+@keyframes bar-pulse-lose {
+    0% {
+        filter: drop-shadow(0 0 0 rgba(255,92,92,0));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 12px rgba(255,92,92,.9));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 0 rgba(255,92,92,0));
+    }
+}
+
+function flashBar(type) {
+    const bar = el.progress.parentElement;
+    bar .classList.remove('flash-win','flash-lose');
+    if (type === 'win')
+
+{
+    bar .classList.add('flash-win');
+    setTimeout(()=> bar.classList.remove('flash-win'), 650);
+}
+
+else if (type === 'lose') {
+    bar .classList.add('flash-lose');
+    setTimeout(()=> bar.classList.remove('flash-lose'), 650);
+}
+}
+
+/* Default fill gradient lives here so we can restore it after flashes */
+:root {
+    --bar-fill: linear-gradient(90deg, var(--accent), #9bd2ff);
+    --bar-win: #19c37d; /* green */
+    --bar-lose: #ff5c5c; /* red */
+}
+
+/* Make the fill animate background changes smoothly */
+.bar > div {
+    background: var(--bar-fill);
+    transition: width .45s cubic-bezier(.22,1,.36,1), background .35s ease; /* animate color/gradient change */
+}
+
+/* While flashing win/loss, temporarily swap the fill color */
+.bar.flash-win > div {
+    background: var(--bar-win);
+}
+
+.bar.flash-lose > div {
+    background: var(--bar-lose);
+}
+
+/* You already have the glow animations:
+   - .bar.flash-win > div { animation: bar-pulse-win .6s ease; }
+   - .bar.flash-lose > div { animation: bar-pulse-lose .6s ease; }
+*/
