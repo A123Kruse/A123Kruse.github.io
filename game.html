@@ -251,7 +251,7 @@
 <body>
     <div class="page-wrap">
         <div class="app">
-            <div class="app">
+            
                 <header>
                     <a class="link" href="index.html">← Home</a>
                     <div class="title">AI or Real? — Game</div>
@@ -412,9 +412,6 @@
                     }
 
                     start();
-                    setLoading(true);
-                    // fetch manifest, build rounds, await preload(state.rounds)
-                    setLoading(false);
 
                     async function start() {
                         try {
@@ -460,6 +457,10 @@
                         el.cards.innerHTML = ''; el.error.textContent = ''; el.status.textContent = `Round ${state.i + 1}`; el.categoryNote.textContent = `Category: ${r.category}`;
                         state.picked = null; el.reveal.disabled = false; el.next.disabled = true;
 
+                        // NEW: compute the visual index (0=A, 1=B) that shows the AI image
+                        const aiVisualIdx = order.findIndex(srcIdx => r.images[srcIdx].label === 'ai');
+                        r.aiSide = aiVisualIdx;  // store on the round so doReveal can check
+
                         order.forEach((srcIdx, visIdx) => {
                             const img = r.images[srcIdx];
                             const card = document.createElement('button'); card.className = 'card'; card.type = 'button';
@@ -501,43 +502,35 @@
                         if (state.picked == null) { el.error.textContent = 'Pick an image first.'; return; }
                         el.error.textContent = '';
 
-                        // ...your existing correctness logic…
-                        const pickedIsAI = (state.picked === r.aiSide); // or whatever you already compute
+                        const pickedIsAI = (state.picked === r.aiSide);
 
-                        if (pickedIsAI) {
-                            state.score++;
-                            // ...your status/UI updates…
-                            flashBar('win');   // ✅ green pulse
-                        } else {
-                            // ...your status/UI updates…
-                            flashBar('lose');  // ✅ red pulse
-                        }
-
-                        // ...rest of your reveal code (disable buttons, etc.)
-                    }
-
-
-
+                        // Show overlays + color borders (green-ish on AI, normal on not AI)
                         el.cards.querySelectorAll('.card').forEach(c => {
-                            const overlay = c.querySelector('.reveal'); overlay.classList.add('show');
-                            const thisIsAI = Number(c.dataset.visualIndex) === aiVisualIdx;
+                            const overlay = c.querySelector('.reveal');
+                            overlay.classList.add('show');
+                            const thisIsAI = Number(c.dataset.visualIndex) === r.aiSide;
                             c.style.borderColor = thisIsAI ? 'var(--win)' : 'var(--ring)';
                         });
 
-                        el.status.innerHTML = pickedIsAI ? '<strong>Correct!</strong> You picked the AI image.' : '<strong>Not quite.</strong> The other image is AI.';
+                        // Status + score
+                        el.status.innerHTML = pickedIsAI
+                            ? '<strong>Correct!</strong> You picked the AI image.'
+                            : '<strong>Not quite.</strong> The other image is AI.';
+
                         if (pickedIsAI) state.score++;
                         el.score.textContent = `Score: ${state.score}`;
-                        el.reveal.disabled = true; el.next.disabled = false;
+
+                        // Flash the progress bar (green/red)
+                        flashBar(pickedIsAI ? 'win' : 'lose');
+
+                        // Lock this round; allow "Next"
+                        el.reveal.disabled = true;
+                        el.next.disabled = false;
                     }
 
-                    function doNext() { if (!current()) return; state.i++; render(); }
 
-                    el.reveal.addEventListener('click', doReveal);
-                    el.next.addEventListener('click', doNext);
-                    el.restart.addEventListener('click', resetGame);
-                })();
             </script>
-        </div>
+        
     </div>
 </body>
 </html>
