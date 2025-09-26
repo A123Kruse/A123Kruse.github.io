@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AI or Real? — Home</title>
 
-    <!-- Shared site-wide styles (fonts, tokens, base colors) -->
+    <!-- Shared site-wide styles -->
     <link rel="stylesheet" href="styles/site.css">
-    <!-- Preview + tooltip styles for the homepage -->
+    <!-- Preview + tooltip styles -->
     <link rel="stylesheet" href="styles/preview.css">
 
-    <!-- Page-specific styles only (keep this for layout bits unique to the page) -->
+    <!-- Page-specific layout styles -->
     <style>
         * {
             box-sizing: border-box
@@ -26,7 +26,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 20px
+            margin-bottom: 20px;
         }
 
         .brand {
@@ -46,7 +46,7 @@
             border-radius: 18px;
             padding: 28px;
             display: grid;
-            gap: 24px
+            gap: 24px;
         }
 
         @media (min-width:900px) {
@@ -66,7 +66,7 @@
             color: var(--text);
             text-decoration: none;
             box-shadow: 0 6px 18px rgba(0,0,0,.35);
-            transition: .15s
+            transition: .15s;
         }
 
             .cta:hover {
@@ -89,7 +89,7 @@
             background: var(--card);
             border: 1px solid var(--ring);
             border-radius: 14px;
-            overflow: hidden
+            overflow: hidden;
         }
 
         .label {
@@ -101,11 +101,10 @@
             background: rgba(0,0,0,.5);
             border: 1px solid var(--ring);
             font-size: 12px;
-            text-transform: uppercase
+            text-transform: uppercase;
         }
 
-        /* Remove/avoid a global .frame rule here — preview.css handles it with .preview .frame */
-        /* If you want the abstract background on empty frames, scope it like this: */
+        /* Abstract background if no <img> */
         .preview .card .frame:not(:has(img)) {
             aspect-ratio: 4/3;
             background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 30%, transparent 31%), radial-gradient(circle at 70% 60%, rgba(255,255,255,.06) 0 26%, transparent 27%), linear-gradient(180deg, #0e1620, #0b1119);
@@ -136,7 +135,7 @@
             background: rgba(255,255,255,.04);
             border: 1px solid var(--ring);
             border-radius: 14px;
-            padding: 16px
+            padding: 16px;
         }
 
             .step h3 {
@@ -149,7 +148,7 @@
             padding: 2px 6px;
             border-radius: 6px;
             border: 1px solid var(--ring);
-            background: #0c141d
+            background: #0c141d;
         }
 
         footer {
@@ -161,10 +160,8 @@
     </style>
 </head>
 
-
-
 <body>
-    <div class="page-wrap">
+    <div class="page-wrap center-y">
         <div class="app">
             <div class="wrap">
                 <header>
@@ -172,7 +169,6 @@
                         <div class="brand">AI or Real?</div>
                         <div class="sub">A quick game to test whether you can spot AI-generated images.</div>
                     </div>
-                    <!-- Main CTA still starts the game -->
                     <a class="cta" href="game.html">Start the Game</a>
                 </header>
 
@@ -196,7 +192,6 @@
                             </div>
                         </div>
 
-                        <!-- Secondary CTA now points to categories.html -->
                         <p style="margin-top:18px">
                             <a class="cta" href="categories.html">Categories Explained</a>
                         </p>
@@ -205,95 +200,36 @@
                     <!-- visual preview -->
                     <div class="preview" aria-hidden="true">
                         <div class="cards">
-                            <!-- Card A with real image + tooltip -->
+                            <!-- Card A (real) -->
                             <div class="card">
                                 <div class="label">A</div>
                                 <div class="frame">
                                     <span class="tooltip">This is a real photo</span>
                                 </div>
-
                                 <div class="ghost">“This is AI”</div>
                             </div>
 
-                            <script>
-                                (function () {
-                                    // Base-aware URL (works with GitHub Pages)
-                                    function toURL(p) {
-                                        if (/^(https?:)?\/\//i.test(p)) return p;
-                                        const clean = String(p).replace(/^\//, '');
-                                        return new URL(clean, document.baseURI).toString();
-                                    }
-
-                                    // Manifest entry -> actual image URL
-                                    function resolveSrc(entry, label, category) {
-                                        const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
-                                        if (!v) return '';
-                                        if (/^(https?:)?\/\//i.test(v)) return v;
-                                        if (v.startsWith('/')) return toURL(v);
-                                        if (v.startsWith('images/')) return toURL(v);
-
-                                        // If entry includes subfolder like "animals/doggy.jpg"
-                                        if (v.includes('/') && !v.startsWith('images/')) {
-                                            return toURL(`images/${v}`); // <-- key change for Option B
-                                        }
-
-                                        // Otherwise treat as bare filename and fall back to label+category
-                                        const folder = label === 'ai' ? 'images/ai' : 'images/real';
-                                        const catPart = category ? `/${category}` : '';
-                                        return toURL(`${folder}${catPart}/${v}`);
-                                    }
-
-                                    function pickFirst(manifest, label) {
-                                        for (const cat of Object.keys(manifest || {})) {
-                                            const bucket = manifest[cat] || {};
-                                            const arr = Array.isArray(bucket[label]) ? bucket[label] : [];
-                                            if (arr.length) return { src: resolveSrc(arr[0], label, cat), cat };
-                                        }
-                                        return null;
-                                    }
-
-                                    async function loadPreview() {
-                                        try {
-                                            const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
-                                            if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
-                                            const manifest = await res.json();
-
-                                            const realPick = pickFirst(manifest, 'real');
-                                            const aiPick = pickFirst(manifest, 'ai');
-
-                                            const A = document.querySelector('.preview .cards .card:nth-child(1) .frame');
-                                            const B = document.querySelector('.preview .cards .card:nth-child(2) .frame');
-
-                                            if (A && realPick?.src) {
-                                                const img = new Image();
-                                                img.alt = 'Example real';
-                                                img.src = realPick.src;
-                                                A.prepend(img);
-                                            }
-                                            if (B && aiPick?.src) {
-                                                const img = new Image();
-                                                img.alt = 'Example AI';
-                                                img.src = aiPick.src;
-                                                B.prepend(img);
-                                            }
-                                        } catch (e) {
-                                            console.error(e);
-                                        }
-                                    }
-
-                                    loadPreview();
-                                })();
-                            </script>
-
-                            <div class="sub">Example layout — actual images load in the game.</div>
+                            <!-- Card B (AI) -->
+                            <div class="card">
+                                <div class="label">B</div>
+                                <div class="frame">
+                                    <span class="tooltip top">This is an AI generated image</span>
+                                </div>
+                                <div class="ghost">“This is AI”</div>
+                            </div>
                         </div>
-
+                        <div class="sub">Example layout — actual images load in the game.</div>
+                    </div>
                 </section>
 
-                <footer>Tip: you can also use <span class="kbd">?shuffle=false</span> on the game page URL for testing left/right consistency.</footer>
+                <footer>
+                    Tip: you can also use <span class="kbd">?shuffle=false</span> on the game page URL for testing left/right consistency.
+                </footer>
             </div>
         </div>
     </div>
+
+    <!-- ✅ Script placed at the bottom, outside .cards -->
     <script>
         (function () {
             function toURL(p) {
@@ -309,10 +245,12 @@
                 if (v.startsWith('/')) return toURL(v);
                 if (v.startsWith('images/')) return toURL(v);
 
+                // If entry includes subfolder like "animals/doggy.jpg"
                 if (v.includes('/') && !v.startsWith('images/')) {
                     return toURL(`images/${v}`);
                 }
 
+                // Otherwise fallback
                 const folder = label === 'ai' ? 'images/ai' : 'images/real';
                 const catPart = category ? `/${category}` : '';
                 return toURL(`${folder}${catPart}/${v}`);
@@ -359,7 +297,5 @@
             loadPreview();
         })();
     </script>
-
-
 </body>
 </html>
