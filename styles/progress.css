@@ -97,29 +97,6 @@
     }
 }
 
-function setLoading(isLoading) {
-    const bar = el.progress.parentElement;
-    // .bar bar.classList.toggle('loading', !!isLoading);
-}
-
-function flashBar(type) {
-    const bar = el.progress.parentElement;
-    // .bar bar.classList.remove('flash-win','flash-lose');
-    if (type === 'win')
-
-{
-    bar .classList.add('flash-win');
-    setTimeout(()=> bar.classList.remove('flash-win'), 650);
-}
-
-else if (type === 'lose') {
-    bar .classList.add('flash-lose');
-    setTimeout(()=> bar.classList.remove('flash-lose'), 650);
-}
-
-}
-
-
 {
     bar .classList.add('flash-win');
     setTimeout(()=> bar.classList.remove('flash-win'), 650);
@@ -157,19 +134,3 @@ else if (type === 'lose') {
    - .bar.flash-win > div { animation: bar-pulse-win .6s ease; }
    - .bar.flash-lose > div { animation: bar-pulse-lose .6s ease; }
 */
-async function start() {
-    try
-
-{
-    setLoading(true);
-    // ...fetch manifest, build rounds... await preload(state.rounds);
-    setLoading(false);
-    resetGame();
-}
-
-catch(err) {
-    setLoading(false);
-    el .error.textContent = err.message;
-    console .error(err);
-}
-}

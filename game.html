@@ -294,6 +294,24 @@
                         status: $('#status'), error: $('#error'), categoryNote: $('#categoryNote'), aria: $('#ariaLive')
                     };
 
+                    function setLoading(isLoading) {
+                        const bar = el.progress.parentElement; // .bar
+                        bar.classList.toggle('loading', !!isLoading);
+                    }
+
+                    function flashBar(type) {
+                        const bar = el.progress.parentElement;
+                        bar.classList.remove('flash-win', 'flash-lose');
+                        if (type === 'win') {
+                            bar.classList.add('flash-win');
+                            setTimeout(() => bar.classList.remove('flash-win'), 650);
+                        } else if (type === 'lose') {
+                            bar.classList.add('flash-lose');
+                            setTimeout(() => bar.classList.remove('flash-lose'), 650);
+                        }
+                    }
+
+
                     const state = { rounds: [], i: 0, score: 0, picked: null, shuffleSides: true };
                     const params = new URLSearchParams(location.search);
                     state.shuffleSides = params.get('shuffle') !== 'false';
@@ -390,6 +408,10 @@
                     }
 
                     start();
+                    setLoading(true);
+                    // fetch manifest, build rounds, await preload(state.rounds)
+                    setLoading(false);
+
                     async function start() {
                         try {
                             const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
