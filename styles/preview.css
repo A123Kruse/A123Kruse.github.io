@@ -1,0 +1,84 @@
+/* styles/preview.css
+   Scoped styles for the homepage preview cards & tooltips
+*/
+
+/* Ensure the preview "frame" can position tooltips */
+.preview .frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #0c141d;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Make images cover the frame nicely */
+.preview .frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.02) contrast(1.02);
+}
+
+/* Base tooltip */
+.preview .tooltip {
+  position: absolute;
+  bottom: 10px;                 /* anchored near bottom by default */
+  left: 50%;
+  transform: translate(-50%, 6px) scale(.98);
+  opacity: 0;
+
+  background: rgba(0,0,0,.85);
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--ring);
+  border-radius: 8px;
+  white-space: nowrap;
+
+  pointer-events: none;         /* avoid stealing hover */
+  transition:
+    opacity .18s ease,
+    transform .18s ease,
+    filter .18s ease;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.35));
+}
+
+/* Little arrow */
+.preview .tooltip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0 6px;
+  border-style: solid;
+  border-color: rgba(0,0,0,.85) transparent transparent transparent;
+}
+
+/* Smooth show on hover */
+.preview .frame:hover .tooltip,
+.preview .frame:focus-within .tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+/* Optional positions (use classes to place the tooltip) */
+.preview .tooltip.top    { bottom: auto; top: 10px; }
+.preview .tooltip.top::after {
+  bottom: auto; top: -6px; transform: translateX(-50%) rotate(180deg);
+}
+
+/* Subtle “breathe” effect while visible */
+@media (prefers-reduced-motion: no-preference) {
+  .preview .frame:hover .tooltip {
+    animation: tooltip-breathe 1.6s ease-in-out .18s both;
+  }
+  @keyframes tooltip-breathe {
+    0%   { filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
+    50%  { filter: drop-shadow(0 8px 16px rgba(0,0,0,.45)); }
+    100% { filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
+  }
+}

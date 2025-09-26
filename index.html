@@ -10,6 +10,9 @@
 
     <!-- Page-specific styles only (layout/components unique to the homepage) -->
     <style>
+        <link rel="stylesheet" href="styles/site.css" >
+        <link rel="stylesheet" href="styles/preview.css" >
+
         * {
             box-sizing: border-box
         }
@@ -200,19 +203,29 @@
                     <!-- visual preview -->
                     <div class="preview" aria-hidden="true">
                         <div class="cards">
+                            <!-- Card A with real image + tooltip -->
                             <div class="card">
                                 <div class="label">A</div>
-                                <div class="frame"></div>
+                                <div class="frame">
+                                    <img src="images/real/animals/doggy.jpg" alt="Dog example">
+                                    <span class="tooltip">This is a real photo</span>
+                                </div>
                                 <div class="ghost">“This is AI”</div>
                             </div>
+
+                            <!-- Card B (keep abstract or add another sample) -->
                             <div class="card">
                                 <div class="label">B</div>
-                                <div class="frame"></div>
+                                <div class="frame">
+                                    <!-- abstract background remains -->
+                                    <span class="tooltip top">AI often struggles with fine details</span>
+                                </div>
                                 <div class="ghost">“This is AI”</div>
                             </div>
                         </div>
                         <div class="sub">Example layout — actual images load in the game.</div>
                     </div>
+
                 </section>
 
                 <footer>Tip: you can also use <span class="kbd">?shuffle=false</span> on the game page URL for testing left/right consistency.</footer>
