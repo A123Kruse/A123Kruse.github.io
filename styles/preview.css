@@ -82,3 +82,99 @@
     100% { filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
   }
 }
+
+/* --- Extra styling for AI preview card (Card B) --- */
+
+/* Red glow border on hover */
+.preview .card:nth-child(2) .frame {
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.preview .card:nth-child(2):hover .frame {
+    border-color: rgba(255, 92, 92, 0.7);
+    box-shadow: 0 0 12px rgba(255, 92, 92, 0.5);
+}
+
+/* Animated pulse glow */
+@keyframes ai-glow {
+    0% {
+        box-shadow: 0 0 6px rgba(255,92,92,.6);
+    }
+
+    50% {
+        box-shadow: 0 0 18px rgba(255,92,92,.9);
+    }
+
+    100% {
+        box-shadow: 0 0 6px rgba(255,92,92,.6);
+    }
+}
+
+.preview .card:nth-child(2):hover .frame {
+    animation: ai-glow 1.5s ease-in-out infinite;
+}
+
+/* Tiny "AI" badge in corner */
+.preview .card:nth-child(2) .frame::before {
+    content: "AI";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255,92,92,0.85);
+    color: #fff;
+    letter-spacing: .5px;
+}
+
+/* --- Extra styling for Real preview card (Card A) --- */
+
+/* Green glow border on hover */
+.preview .card:nth-child(1) .frame {
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.preview .card:nth-child(1):hover .frame {
+    border-color: rgba(25, 195, 125, 0.7);
+    box-shadow: 0 0 12px rgba(25, 195, 125, 0.5);
+}
+
+/* Animated pulse glow */
+@keyframes real-glow {
+    0% {
+        box-shadow: 0 0 6px rgba(25,195,125,.6);
+    }
+
+    50% {
+        box-shadow: 0 0 18px rgba(25,195,125,.9);
+    }
+
+    100% {
+        box-shadow: 0 0 6px rgba(25,195,125,.6);
+    }
+}
+
+.preview .card:nth-child(1):hover .frame {
+    animation: real-glow 1.5s ease-in-out infinite;
+}
+
+/* Tiny "REAL" badge in corner */
+.preview .card:nth-child(1) .frame::before {
+    content: "REAL";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(25,195,125,0.85);
+    color: #fff;
+    letter-spacing: .5px;
+}
