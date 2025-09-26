@@ -331,21 +331,27 @@
                     function resolveSrc(entry, label, category) {
                         const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
                         if (!v) return '';
+
+                        // Already absolute or rooted
                         if (/^(https?:)?\/\//i.test(v)) return v;
                         if (v.startsWith('/')) return toURL(v);
                         if (v.startsWith('images/')) return toURL(v);
 
-                        // If entry already includes a subfolder like "animals/doggy.jpg"
-                        // and your repo stores files under "images/animals/...", build that path:
+                        // If manifest entry carries a subfolder like "animals/doggy.jpg"
                         if (v.includes('/') && !v.startsWith('images/')) {
-                            return toURL(`images/${v}`);         // <-- key change
+                            return toURL(`images/${v}`);                 // → images/animals/doggy.jpg
                         }
 
-                        // Otherwise treat as bare filename and fall back to label+category
+                        // 👇 Option B default for bare filenames (preferred in your repo)
+                        if (category) {
+                            return toURL(`images/${category}/${v}`);     // → images/animals/doggy.jpg
+                        }
+
+                        // Last-resort legacy path (if no category provided)
                         const folder = label === 'ai' ? 'images/ai' : 'images/real';
-                        const catPart = category ? `/${category}` : '';
-                        return toURL(`${folder}${catPart}/${v}`);
+                        return toURL(`${folder}/${v}`);
                     }
+
 
 
                     function autoAlt(x) {
