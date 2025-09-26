@@ -7,12 +7,11 @@
 
     <!-- Shared site-wide styles (fonts, tokens, base colors) -->
     <link rel="stylesheet" href="styles/site.css">
+    <!-- Preview + tooltip styles for the homepage -->
+    <link rel="stylesheet" href="styles/preview.css">
 
-    <!-- Page-specific styles only (layout/components unique to the homepage) -->
+    <!-- Page-specific styles only (keep this for layout bits unique to the page) -->
     <style>
-        <link rel="stylesheet" href="styles/site.css" >
-        <link rel="stylesheet" href="styles/preview.css" >
-
         * {
             box-sizing: border-box
         }
@@ -105,10 +104,12 @@
             text-transform: uppercase
         }
 
-        .frame {
+        /* Remove/avoid a global .frame rule here — preview.css handles it with .preview .frame */
+        /* If you want the abstract background on empty frames, scope it like this: */
+        .preview .card .frame:not(:has(img)) {
             aspect-ratio: 4/3;
-            background: radial-gradient(circle at 30% 35%,rgba(255,255,255,.08) 0 30%,transparent 31%),radial-gradient(circle at 70% 60%,rgba(255,255,255,.06) 0 26%,transparent 27%),linear-gradient(180deg,#0e1620,#0b1119);
-            border-bottom: 1px solid var(--ring)
+            background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 30%, transparent 31%), radial-gradient(circle at 70% 60%, rgba(255,255,255,.06) 0 26%, transparent 27%), linear-gradient(180deg, #0e1620, #0b1119);
+            border-bottom: 1px solid var(--ring);
         }
 
         .ghost {
@@ -159,6 +160,7 @@
         }
     </style>
 </head>
+
 
 
 <body>
