@@ -307,15 +307,22 @@
                     function resolveSrc(entry, label, category) {
                         const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
                         if (!v) return '';
-                        if (/^(https?:)?\/\//i.test(v)) return v;           // full URL
-                        if (v.startsWith('/')) return toURL(v);             // /images/real/animals/x.jpg
-                        if (v.startsWith('images/')) return toURL(v);       // images/real/animals/x.jpg
-                        if (v.includes('/')) return toURL(`images/${label}/${v}`); // animals/x.jpg
-                        // bare filename → insert category folder
+                        if (/^(https?:)?\/\//i.test(v)) return v;
+                        if (v.startsWith('/')) return toURL(v);
+                        if (v.startsWith('images/')) return toURL(v);
+
+                        // If entry already includes a subfolder like "animals/doggy.jpg"
+                        // and your repo stores files under "images/animals/...", build that path:
+                        if (v.includes('/') && !v.startsWith('images/')) {
+                            return toURL(`images/${v}`);         // <-- key change
+                        }
+
+                        // Otherwise treat as bare filename and fall back to label+category
                         const folder = label === 'ai' ? 'images/ai' : 'images/real';
                         const catPart = category ? `/${category}` : '';
                         return toURL(`${folder}${catPart}/${v}`);
                     }
+
 
                     function autoAlt(x) {
                         const s = typeof x === 'string' ? x : (x?.file ?? x?.src ?? '');
