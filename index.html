@@ -294,18 +294,72 @@
             </div>
         </div>
     </div>
-    <div class="cards">
-        <div class="card"> … </div>
+    <script>
+        (function () {
+            function toURL(p) {
+                if (/^(https?:)?\/\//i.test(p)) return p;
+                const clean = String(p).replace(/^\//, '');
+                return new URL(clean, document.baseURI).toString();
+            }
 
-        <script>
-  <!-- ❌ this sits inside your grid-- >
-                    (function () {
-                  …
-                    })();
-        </script>
+            function resolveSrc(entry, label, category) {
+                const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
+                if (!v) return '';
+                if (/^(https?:)?\/\//i.test(v)) return v;
+                if (v.startsWith('/')) return toURL(v);
+                if (v.startsWith('images/')) return toURL(v);
 
-        <div class="card"> … </div>
-    </div>
+                if (v.includes('/') && !v.startsWith('images/')) {
+                    return toURL(`images/${v}`);
+                }
+
+                const folder = label === 'ai' ? 'images/ai' : 'images/real';
+                const catPart = category ? `/${category}` : '';
+                return toURL(`${folder}${catPart}/${v}`);
+            }
+
+            function pickFirst(manifest, label) {
+                for (const cat of Object.keys(manifest || {})) {
+                    const bucket = manifest[cat] || {};
+                    const arr = Array.isArray(bucket[label]) ? bucket[label] : [];
+                    if (arr.length) return { src: resolveSrc(arr[0], label, cat), cat };
+                }
+                return null;
+            }
+
+            async function loadPreview() {
+                try {
+                    const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
+                    const manifest = await res.json();
+
+                    const realPick = pickFirst(manifest, 'real');
+                    const aiPick = pickFirst(manifest, 'ai');
+
+                    const A = document.querySelector('.preview .cards .card:nth-child(1) .frame');
+                    const B = document.querySelector('.preview .cards .card:nth-child(2) .frame');
+
+                    if (A && realPick?.src) {
+                        const img = new Image();
+                        img.alt = 'Example real';
+                        img.src = realPick.src;
+                        A.prepend(img);
+                    }
+                    if (B && aiPick?.src) {
+                        const img = new Image();
+                        img.alt = 'Example AI';
+                        img.src = aiPick.src;
+                        B.prepend(img);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            loadPreview();
+        })();
+    </script>
+
 
 </body>
 </html>
