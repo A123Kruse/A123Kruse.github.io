@@ -404,6 +404,30 @@
                         el.error.innerHTML = failures.length
                             ? 'Some images failed to load:<br>' + failures.map(u => `<a style="color:#9bd2ff" href="${u}" target="_blank" rel="noreferrer">${u}</a>`).join('<br>')
                             : '';
+
+                        async function preload(rounds) {
+                            const fails = [];
+                            const tasks = [];
+
+                            for (const r of rounds) {
+                                for (const img of r.images) {
+                                    tasks.push(new Promise(res => {
+                                        const i = new Image();
+                                        i.onload = res;
+                                        i.onerror = () => { fails.push(img.src); res(); };
+                                        i.src = img.src;
+                                    }));
+                                }
+                            }
+                            await Promise.all(tasks);
+
+                            if (DEBUG && fails.length) {
+                                const msg = `Preload failures (${fails.length}):\n` + fails.join('\n');
+                                console.warn(msg);
+                                setDebug((document.getElementById('debug')?.textContent || '') + '\n\n' + msg);
+                            }
+                        }
+
                     }
 
                     // keep your existing helpers (toURL, resolveSrc, autoAlt, shuffle, etc.)
