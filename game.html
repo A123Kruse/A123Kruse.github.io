@@ -151,6 +151,9 @@
             justify-content: space-between
         }
 
+        <pre id="debug" class="small" style="margin-top:8px; white-space:pre-wrap;" > </pre >
+
+
         .btn-main {
             padding: 12px 16px;
             background: linear-gradient(180deg,#172031,#121a28);
@@ -354,6 +357,7 @@
 
 
 
+
                     function autoAlt(x) {
                         const s = typeof x === 'string' ? x : (x?.file ?? x?.src ?? '');
                         return String(s).split('/').pop().replace(/\.[a-z0-9]+$/i, '').replace(/[-_]/g, ' ');
@@ -433,6 +437,13 @@
                             await preload(state.rounds);            // still loading…
                             setLoading(false);                      // ← stop stripes
 
+                            const manifest = await res.json();
+                            if (DEBUG) {
+                                console.log('Manifest:', manifest);
+                                setDebug('Loaded manifest.\n(See console for full object)');
+                            }
+
+
                             resetGame();
                         } catch (err) {
                             setLoading(false);
@@ -466,6 +477,18 @@
                         // NEW: compute the visual index (0=A, 1=B) that shows the AI image
                         const aiVisualIdx = order.findIndex(srcIdx => r.images[srcIdx].label === 'ai');
                         r.aiSide = aiVisualIdx;  // store on the round so doReveal can check
+
+                        if (DEBUG) {
+                            const info =
+                                `Round ${state.i + 1}\n` +
+                                `Category: ${r.category}\n` +
+                                `A src: ${imgA.src}\n` +
+                                `B src: ${imgB.src}\n` +
+                                `AI side (0=A,1=B): ${r.aiSide}`;
+                            console.log(info);
+                            setDebug(info);
+                        }
+
 
                         order.forEach((srcIdx, visIdx) => {
                             const img = r.images[srcIdx];
