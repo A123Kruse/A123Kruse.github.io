@@ -298,6 +298,35 @@
                         status: $('#status'), error: $('#error'), categoryNote: $('#categoryNote'), aria: $('#ariaLive')
                     };
 
+                    function fireStreakToast(count) {
+                        const pop = el.streakPop;
+                        const conf = pop.querySelector('.confetti');
+                        if (!pop || !conf) return;
+
+                        el.streakCount.textContent = String(count);
+
+                        conf.innerHTML = '';
+                        const N = 42;
+                        for (let i = 0; i < N; i++) {
+                            const piece = document.createElement('i');
+                            piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
+                            piece.style.setProperty('--t', String(900 + Math.random() * 700));
+                            piece.style.setProperty('--d', String(Math.random() * 350));
+                            const hue = Math.floor(Math.random() * 360);
+                            piece.style.background = `hsl(${hue} 85% 60%)`;
+                            piece.style.boxShadow = `0 0 0 1px hsl(${hue} 85% 45% / .35) inset`;
+                            conf.appendChild(piece);
+                        }
+
+                        pop.hidden = false;
+                        void pop.offsetWidth; // force reflow
+                        pop.classList.add('show');
+
+                        setTimeout(() => {
+                            pop.classList.remove('show');
+                            setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
+                        }, 1400);
+
                     const state = { rounds: [], i: 0, score: 0, picked: null, shuffleSides: true, aiStreak: 0 };
                     const params = new URLSearchParams(location.search);
                     state.shuffleSides = params.get('shuffle') !== 'false';
@@ -524,35 +553,6 @@
                             }
 
             </script>
-
-            function fireStreakToast(count) {
-            const pop = el.streakPop;
-            const conf = pop.querySelector('.confetti');
-            if (!pop || !conf) return;
-
-            el.streakCount.textContent = String(count);
-
-            conf.innerHTML = '';
-            const N = 42;
-            for (let i = 0; i < N; i++) {
-            const piece = document.createElement('i');
-            piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
-            piece.style.setProperty('--t', String(900 + Math.random() * 700));
-            piece.style.setProperty('--d', String(Math.random() * 350));
-            const hue = Math.floor(Math.random() * 360);
-            piece.style.background = `hsl(${hue} 85% 60%)`;
-            piece.style.boxShadow = `0 0 0 1px hsl(${hue} 85% 45% / .35) inset`;
-            conf.appendChild(piece);
-            }
-
-            pop.hidden = false;
-            void pop.offsetWidth; // force reflow
-            pop.classList.add('show');
-
-            setTimeout(() => {
-            pop.classList.remove('show');
-            setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
-            }, 1400);
 
             <!-- Streak popup (hidden by default) -->
             <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
