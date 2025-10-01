@@ -406,12 +406,34 @@
                         return hit || null;
                     }
 
+                    
+                    // -------- Robust manifest loader with path fallbacks --------
+                    async function fetchManifestWithFallbacks() {
+                        const tried = [];
+                        const candidates = [
+                            'images/manifest.json',
+                            './images/manifest.json',
+                            'manifest.json',
+                            './manifest.json'
+                        ];
+                        for (const c of candidates) {
+                            const url = toURL(c);
+                            tried.push(url);
+                            try {
+                                const r = await fetch(url, { cache: 'no-store' });
+                                if (r.ok) return { json: await r.json(), url };
+                            } catch (e) {
+                                // continue
+                            }
+                        }
+                        throw new Error('Could not load a manifest from any path. Tried:\n' + tried.join('\n'));
+                    }
+
                     start();
+                    
                     async function start() {
                         try {
-                            const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
-                            if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
-                            const manifest = await res.json();
+                            const { json: manifest, url: usedUrl } = await fetchManifestWithFallbacks();
 
                             // 🏷️ Read ?cat from URL and filter if valid
                             const url = new URL(window.location.href);
@@ -420,6 +442,41 @@
                             if (catParam) {
                                 selectedCat = findMatchingCategory(Object.keys(manifest || {}), catParam);
                             }
+
+                            // Use either the single-category subset or the whole manifest
+                            const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
+
+                            // Build rounds
+                            state.rounds = buildRoundsFromCategorizedManifest(manifestToUse);
+                            if (!state.rounds.length) {
+                                if (selectedCat) {
+                                    state.rounds = buildRoundsFromCategorizedManifest(manifest);
+                                    el.error.textContent = `No rounds found for category "${catParam}". Showing all categories instead.`;
+                                    selectedCat = null;
+                                }
+                                if (!state.rounds.length) throw new Error('No playable rounds (check manifest contents).');
+                            }
+
+                            // Show which manifest path was used (helps debugging)
+                            el.status.textContent = `Loaded manifest from: ${usedUrl}`;
+
+                            // Show category pill if filtered
+                            const catPill = document.getElementById('catPill');
+                            if (selectedCat && catPill) {
+                                catPill.textContent = `Category: ${selectedCat}`;
+                                catPill.style.display = 'inline-block';
+                            } else if (catPill) {
+                                catPill.style.display = 'none';
+                            }
+
+                            await preload(state.rounds);
+                            resetGame();
+                        } catch (err) {
+                            el.error.innerHTML = String(err).replace(/\n/g,'<br>');
+                            console.error(err);
+                        }
+                    }
+
 
                             // Use either the single-category subset or the whole manifest
                             const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
