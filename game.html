@@ -560,18 +560,8 @@
 
     // Update ARIA live region
     if (el.aria) el.aria.textContent = pickedIsAI ? 'Correct. You chose the AI image.' : 'Incorrect. The other image was AI.';
-} else {
-                            state.aiStreak = 0;
-                        }
-                        el.score.textContent = `Score: ${state.score}`;
+}
 
-                        // Show popup on 3+ correct AI picks in a row
-                        if (state.aiStreak >= 3) {
-                            fireStreakToast(state.aiStreak);
-                        }
-
-
-                    }
 
                     function fireStreakToast(count) {
                         const pop = el.streakPop;
