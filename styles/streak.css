@@ -1,0 +1,66 @@
+/* ——— Streak popup (toast + confetti) ——— */
+.streak-pop {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+    .streak-pop[hidden] {
+        display: none;
+    }
+
+    .streak-pop .toast {
+        pointer-events: auto;
+        padding: 14px 18px;
+        border-radius: 12px;
+        border: 1px solid var(--ring);
+        background: linear-gradient(180deg,#172031,#121a28);
+        color: var(--text);
+        font-weight: 800;
+        box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        transform: scale(.92);
+        opacity: 0;
+        transition: transform .22s ease, opacity .22s ease;
+    }
+
+    .streak-pop.show .toast {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    /* Confetti layer */
+    .streak-pop .confetti {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+        .streak-pop .confetti i {
+            position: absolute;
+            top: -12px;
+            width: 8px;
+            height: 14px;
+            opacity: .95;
+            transform: translateY(-20px) rotate(0deg);
+            left: calc(var(--x, 50) * 1%);
+            animation: confetti-fall calc(var(--t, 1200) * 1ms) linear forwards;
+            animation-delay: calc(var(--d, 0) * 1ms);
+            border-radius: 2px;
+        }
+
+@keyframes confetti-fall {
+    to {
+        transform: translateY(110vh) rotate(540deg);
+        opacity: .9;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .streak-pop .confetti i {
+        animation: none;
+    }
+}
