@@ -287,6 +287,19 @@
                 </main>
             </div>
 
+            <!-- Streak popup (hidden by default) -->
+            <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
+                <div class="toast">
+                    🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉
+                </div>
+                <div class="confetti" aria-hidden="true"></div>
+            </div>
+
+        </div>
+    </div>
+
+
+
             <script>
                 (function () {
                     const $ = (s, r = document) => r.querySelector(s);
@@ -499,10 +512,55 @@
                     }
 
                     function doReveal() {
-                        if (pickedIsAI) {
-                            state.score++;
-                            state.aiStreak++;
-                        } else {
+    const r = current();
+    if (!r) return;
+
+    // Require a selection
+    if (state.picked === null || state.picked === undefined) {
+        el.status.textContent = 'Pick A or B first, then click Reveal (or press R).';
+        return;
+    }
+
+    // Find the selected card and its underlying source index
+    const selCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
+    const srcIndex = selCard ? Number(selCard.dataset.srcIndex) : -1;
+    const pickedIsAI = srcIndex >= 0 ? (r.images[srcIndex]?.label === 'ai') : false;
+
+    // Show reveal overlays on both cards
+    el.cards.querySelectorAll('.reveal').forEach((ov) => ov.classList.add('show'));
+
+    // Highlight which overlay is the AI image
+    document.querySelectorAll('.card').forEach((card) => {
+        const chip = card.querySelector('.reveal .chip');
+        if (!chip) return;
+        const si = Number(card.dataset.srcIndex);
+        if (r.images[si]?.label === 'ai') chip.classList.add('win');
+        else chip.classList.remove('win');
+    });
+
+    // Score & streak
+    if (pickedIsAI) {
+        state.score++;
+        state.aiStreak++;
+        el.status.innerHTML = '<strong>Correct!</strong> You picked the AI image.';
+    } else {
+        state.aiStreak = 0;
+        el.status.innerHTML = '<strong>Not quite.</strong> The other image is AI.';
+    }
+    el.score.textContent = `Score: ${state.score}`;
+
+    // Toast on 3+ correct AI picks in a row
+    if (state.aiStreak >= 3) {
+        fireStreakToast(state.aiStreak);
+    }
+
+    // Enable Next; disable Reveal
+    el.next.disabled = false;
+    el.reveal.disabled = true;
+
+    // Update ARIA live region
+    if (el.aria) el.aria.textContent = pickedIsAI ? 'Correct. You chose the AI image.' : 'Incorrect. The other image was AI.';
+} else {
                             state.aiStreak = 0;
                         }
                         el.score.textContent = `Score: ${state.score}`;
@@ -551,20 +609,6 @@
                     el.reveal.addEventListener('click', doReveal);
                     el.next.addEventListener('click', doNext);
                     el.restart.addEventListener('click', resetGame);
-                })();
-                            }
-
-            </script>
-
-            <!-- Streak popup (hidden by default) -->
-            <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
-                <div class="toast">
-                    🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉
-                </div>
-                <div class="confetti" aria-hidden="true"></div>
-            </div>
-
-        </div>
-    </div>
-</body>
+                }})();
+</script></body>
 </html>
