@@ -248,13 +248,6 @@
     </style>
 </head>
 
-<!-- Streak popup (hidden by default) -->
-<div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
-    <div class="toast">
-        🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉
-    </div>
-    <div class="confetti" aria-hidden="true"></div>
-</div>
 
 
 <body>
@@ -506,26 +499,6 @@
                     }
 
                     function doReveal() {
-                        const r = current(); if (!r) return;
-                        if (state.picked == null) { el.error.textContent = 'Pick an image first.'; return; }
-                        el.error.textContent = '';
-                        const card = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
-                        const selectedSrcIdx = Number(card?.dataset.srcIndex || 0);
-                        const pickedIsAI = r.images[selectedSrcIdx].label === 'ai';
-                        const aiSrcIdx = r.images.findIndex(i => i.label === 'ai');
-                        const aiVisualIdx = Number(el.cards.querySelector(`.card[data-src-index="${aiSrcIdx}"]`)?.dataset.visualIndex || 0);
-
-                        el.cards.querySelectorAll('.card').forEach(c => {
-                            const overlay = c.querySelector('.reveal'); overlay.classList.add('show');
-                            const thisIsAI = Number(c.dataset.visualIndex) === aiVisualIdx;
-                            c.style.borderColor = thisIsAI ? 'var(--win)' : 'var(--ring)';
-                        });
-
-                        el.status.innerHTML = pickedIsAI ? '<strong>Correct!</strong> You picked the AI image.' : '<strong>Not quite.</strong> The other image is AI.';
-                        if (pickedIsAI) state.score++;
-                        el.score.textContent = `Score: ${state.score}`;
-                        el.reveal.disabled = true; el.next.disabled = false;
-
                         if (pickedIsAI) {
                             state.score++;
                             state.aiStreak++;
@@ -539,6 +512,7 @@
                             fireStreakToast(state.aiStreak);
                         }
 
+
                     }
 
                     function doNext() { if (!current()) return; state.i++; render(); }
@@ -547,37 +521,47 @@
                     el.next.addEventListener('click', doNext);
                     el.restart.addEventListener('click', resetGame);
                 })();
-                function fireStreakToast(count) {
-                    const pop = el.streakPop;
-                    const conf = pop.querySelector('.confetti');
-                    if (!pop || !conf) return;
-
-                    el.streakCount.textContent = String(count);
-
-                    conf.innerHTML = '';
-                    const N = 42;
-                    for (let i = 0; i < N; i++) {
-                        const piece = document.createElement('i');
-                        piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
-                        piece.style.setProperty('--t', String(900 + Math.random() * 700));
-                        piece.style.setProperty('--d', String(Math.random() * 350));
-                        const hue = Math.floor(Math.random() * 360);
-                        piece.style.background = `hsl(${hue} 85% 60%)`;
-                        piece.style.boxShadow = `0 0 0 1px hsl(${hue} 85% 45% / .35) inset`;
-                        conf.appendChild(piece);
-                    }
-
-                    pop.hidden = false;
-                    void pop.offsetWidth; // force reflow
-                    pop.classList.add('show');
-
-                    setTimeout(() => {
-                        pop.classList.remove('show');
-                        setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
-                    }, 1400);
-                }
+                            }
 
             </script>
+
+            function fireStreakToast(count) {
+            const pop = el.streakPop;
+            const conf = pop.querySelector('.confetti');
+            if (!pop || !conf) return;
+
+            el.streakCount.textContent = String(count);
+
+            conf.innerHTML = '';
+            const N = 42;
+            for (let i = 0; i < N; i++) {
+            const piece = document.createElement('i');
+            piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
+            piece.style.setProperty('--t', String(900 + Math.random() * 700));
+            piece.style.setProperty('--d', String(Math.random() * 350));
+            const hue = Math.floor(Math.random() * 360);
+            piece.style.background = `hsl(${hue} 85% 60%)`;
+            piece.style.boxShadow = `0 0 0 1px hsl(${hue} 85% 45% / .35) inset`;
+            conf.appendChild(piece);
+            }
+
+            pop.hidden = false;
+            void pop.offsetWidth; // force reflow
+            pop.classList.add('show');
+
+            setTimeout(() => {
+            pop.classList.remove('show');
+            setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
+            }, 1400);
+
+            <!-- Streak popup (hidden by default) -->
+            <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
+                <div class="toast">
+                    🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉
+                </div>
+                <div class="confetti" aria-hidden="true"></div>
+            </div>
+
         </div>
     </div>
 </body>
