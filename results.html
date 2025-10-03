@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI or Real? – Results</title>
+  <link rel="stylesheet" href="results.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="bar">
+      <a class="btn" href="index.html">← Home</a>
+      <h1>Results</h1>
+      <a class="btn" href="game.html">Play Again</a>
+    </header>
+
+    <section id="summary" class="cards"></section>
+
+    <section id="breakdown" class="card">
+      <h2>Category Breakdown</h2>
+      <div id="tableWrap"></div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+    const s = sessionStorage.getItem('ai-or-real:summary');
+    const summaryEl = document.getElementById('summary');
+    const tableWrap = document.getElementById('tableWrap');
+
+    if (!s) {
+      summaryEl.innerHTML = `
+        <div class="card">
+          <p>No results found. <a href="game.html">Play a round</a> to see your stats.</p>
+        </div>`;
+      return;
+    }
+
+    const data = JSON.parse(s);
+    const { score, total, accuracy, bestStreak, breakdown } = data;
+
+    summaryEl.innerHTML = `
+      <div class="card kpis">
+        <div><div class="k">Score</div><div class="v">${score}/${total}</div></div>
+        <div><div class="k">Accuracy</div><div class="v">${accuracy}%</div></div>
+        <div><div class="k">Best AI Streak</div><div class="v">${bestStreak}×</div></div>
+      </div>
+    `;
+
+    // Build table
+    const rows = Object.entries(breakdown || {}).map(([cat, v]) => {
+      const pct = v.total ? Math.round((v.correct / v.total) * 100) : 0;
+      return `<tr>
+        <td>${cat}</td>
+        <td>${v.correct}/${v.total}</td>
+        <td>${pct}%</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="3">No category data.</td></tr>`;
+
+    tableWrap.innerHTML = `
+      <table class="stats">
+        <thead><tr><th>Category</th><th>Correct</th><th>Accuracy</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="actions">
+        <a class="btn primary" href="game.html">Play Again</a>
+      </div>
+    `;
+  })();
+  </script>
+</body>
+</html>
