@@ -287,19 +287,6 @@
                 </main>
             </div>
 
-            <!-- Streak popup (hidden by default) -->
-            <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
-                <div class="toast">
-                    🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉
-                </div>
-                <div class="confetti" aria-hidden="true"></div>
-            </div>
-
-        </div>
-    </div>
-
-
-
             <script>
                 (function () {
                     const $ = (s, r = document) => r.querySelector(s);
@@ -406,34 +393,12 @@
                         return hit || null;
                     }
 
-                    
-                    // -------- Robust manifest loader with path fallbacks --------
-                    async function fetchManifestWithFallbacks() {
-                        const tried = [];
-                        const candidates = [
-                            'images/manifest.json',
-                            './images/manifest.json',
-                            'manifest.json',
-                            './manifest.json'
-                        ];
-                        for (const c of candidates) {
-                            const url = toURL(c);
-                            tried.push(url);
-                            try {
-                                const r = await fetch(url, { cache: 'no-store' });
-                                if (r.ok) return { json: await r.json(), url };
-                            } catch (e) {
-                                // continue
-                            }
-                        }
-                        throw new Error('Could not load a manifest from any path. Tried:\n' + tried.join('\n'));
-                    }
-
                     start();
-                    
                     async function start() {
                         try {
-                            const { json: manifest, url: usedUrl } = await fetchManifestWithFallbacks();
+                            const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
+                            if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
+                            const manifest = await res.json();
 
                             // 🏷️ Read ?cat from URL and filter if valid
                             const url = new URL(window.location.href);
@@ -442,41 +407,6 @@
                             if (catParam) {
                                 selectedCat = findMatchingCategory(Object.keys(manifest || {}), catParam);
                             }
-
-                            // Use either the single-category subset or the whole manifest
-                            const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
-
-                            // Build rounds
-                            state.rounds = buildRoundsFromCategorizedManifest(manifestToUse);
-                            if (!state.rounds.length) {
-                                if (selectedCat) {
-                                    state.rounds = buildRoundsFromCategorizedManifest(manifest);
-                                    el.error.textContent = `No rounds found for category "${catParam}". Showing all categories instead.`;
-                                    selectedCat = null;
-                                }
-                                if (!state.rounds.length) throw new Error('No playable rounds (check manifest contents).');
-                            }
-
-                            // Show which manifest path was used (helps debugging)
-                            el.status.textContent = `Loaded manifest from: ${usedUrl}`;
-
-                            // Show category pill if filtered
-                            const catPill = document.getElementById('catPill');
-                            if (selectedCat && catPill) {
-                                catPill.textContent = `Category: ${selectedCat}`;
-                                catPill.style.display = 'inline-block';
-                            } else if (catPill) {
-                                catPill.style.display = 'none';
-                            }
-
-                            await preload(state.rounds);
-                            resetGame();
-                        } catch (err) {
-                            el.error.innerHTML = String(err).replace(/\n/g,'<br>');
-                            console.error(err);
-                        }
-                    }
-
 
                             // Use either the single-category subset or the whole manifest
                             const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
@@ -569,56 +499,21 @@
                     }
 
                     function doReveal() {
-    const r = current();
-    if (!r) return;
+                        if (pickedIsAI) {
+                            state.score++;
+                            state.aiStreak++;
+                        } else {
+                            state.aiStreak = 0;
+                        }
+                        el.score.textContent = `Score: ${state.score}`;
 
-    // Require a selection
-    if (state.picked === null || state.picked === undefined) {
-        el.status.textContent = 'Pick A or B first, then click Reveal (or press R).';
-        return;
-    }
+                        // Show popup on 3+ correct AI picks in a row
+                        if (state.aiStreak >= 3) {
+                            fireStreakToast(state.aiStreak);
+                        }
 
-    // Find the selected card and its underlying source index
-    const selCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
-    const srcIndex = selCard ? Number(selCard.dataset.srcIndex) : -1;
-    const pickedIsAI = srcIndex >= 0 ? (r.images[srcIndex]?.label === 'ai') : false;
 
-    // Show reveal overlays on both cards
-    el.cards.querySelectorAll('.reveal').forEach((ov) => ov.classList.add('show'));
-
-    // Highlight which overlay is the AI image
-    document.querySelectorAll('.card').forEach((card) => {
-        const chip = card.querySelector('.reveal .chip');
-        if (!chip) return;
-        const si = Number(card.dataset.srcIndex);
-        if (r.images[si]?.label === 'ai') chip.classList.add('win');
-        else chip.classList.remove('win');
-    });
-
-    // Score & streak
-    if (pickedIsAI) {
-        state.score++;
-        state.aiStreak++;
-        el.status.innerHTML = '<strong>Correct!</strong> You picked the AI image.';
-    } else {
-        state.aiStreak = 0;
-        el.status.innerHTML = '<strong>Not quite.</strong> The other image is AI.';
-    }
-    el.score.textContent = `Score: ${state.score}`;
-
-    // Toast on 3+ correct AI picks in a row
-    if (state.aiStreak >= 3) {
-        fireStreakToast(state.aiStreak);
-    }
-
-    // Enable Next; disable Reveal
-    el.next.disabled = false;
-    el.reveal.disabled = true;
-
-    // Update ARIA live region
-    if (el.aria) el.aria.textContent = pickedIsAI ? 'Correct. You chose the AI image.' : 'Incorrect. The other image was AI.';
-}
-
+                    }
 
                     function fireStreakToast(count) {
                         const pop = el.streakPop;
@@ -656,6 +551,20 @@
                     el.reveal.addEventListener('click', doReveal);
                     el.next.addEventListener('click', doNext);
                     el.restart.addEventListener('click', resetGame);
-                }})();
-</script></body>
+                })();
+                            }
+
+            </script>
+
+            <!-- Streak popup (hidden by default) -->
+            <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
+                <div class="toast">
+                    🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉
+                </div>
+                <div class="confetti" aria-hidden="true"></div>
+            </div>
+
+        </div>
+    </div>
+</body>
 </html>
