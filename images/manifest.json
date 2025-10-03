@@ -1,5 +1,5 @@
 {
-  "Animals": {
+  "animals": {
     "real": [
       "bear.png",
       "between some rocks.png",
@@ -51,7 +51,7 @@
       "zebra ai.jpg"
     ]
   },
-  "Anime Fanart": {
+  "anime fanart": {
     "real": [
       "anime girl.jpg",
       "anime parrents.jpg",
@@ -92,7 +92,7 @@
       "why are there so many gender swap ai.jpg"
     ]
   },
-  "Art I Might Be Able To Find At Home Goods": {
+  "art i might be able to find at home goods": {
     "real": [
       "Rebecca Perry Flower 2.jpg",
       "Rebecca Perry Flower.webp",
@@ -130,7 +130,7 @@
       "wizard of beer.jpg"
     ]
   },
-  "Furries": {
+  "furries": {
     "real": [
       "comic furry.png",
       "dapper deer.jpg",
@@ -155,7 +155,7 @@
       "solid fake.jpg"
     ]
   },
-  "People": {
+  "people": {
     "real": [
       "Screenshot 2025-09-18 143944.png",
       "beach family.png",
@@ -196,7 +196,7 @@
       "overwatch.jpg"
     ]
   },
-  "Presidents": {
+  "presidents": {
     "real": [
       "Bush_Speech_KIDS_0821.jpg",
       "Franklin D Roosevelt.png",
@@ -229,7 +229,7 @@
       "ai roosevelt.jpg"
     ]
   },
-  "Surrealism": {
+  "surrealism": {
     "real": [
       "25ce0ab9830a101b18da8dcda02833e3.jpg",
       "55b8f7d21400002f002e13f7.jpg",
