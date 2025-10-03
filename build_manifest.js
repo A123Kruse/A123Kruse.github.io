@@ -1,4 +1,4 @@
-// build_manifest.js — robust version
+// build_manifest.js — with lowercase category names
 const fs = require("fs");
 const path = require("path");
 
@@ -34,8 +34,12 @@ function build() {
       if (!fs.lstatSync(catPath).isDirectory()) return;
 
       const files = listFiles(catPath);
-      if (!manifest[category]) manifest[category] = { real: [], ai: [] };
-      manifest[category][kind] = files;
+
+      // normalize category name to lowercase
+      const norm = category.toLowerCase();
+
+      if (!manifest[norm]) manifest[norm] = { real: [], ai: [] };
+      manifest[norm][kind] = files;
     });
   });
 
@@ -56,4 +60,3 @@ try {
   console.error("❌ Failed to write manifest:", e.message);
   process.exit(1);
 }
-
