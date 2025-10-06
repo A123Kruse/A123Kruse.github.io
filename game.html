@@ -296,6 +296,16 @@
             </div>
 
             <script>
+
+                const state = {
+                    rounds: [], i: 0, score: 0, picked: null, shuffleSides: true,
+                    aiStreak: 0,
+                    bestStreak: 0,          // NEW
+                    breakdown: {}           // NEW: per-category stats
+                };
+
+
+
                 (function () {
                     const $ = (s, r = document) => r.querySelector(s);
                     const el = {
@@ -470,6 +480,23 @@
                         el.cards.innerHTML = ''; el.error.textContent = ''; el.status.textContent = `Round ${state.i + 1}`; el.categoryNote.textContent = `Category: ${r.category}`;
                         state.picked = null; el.reveal.disabled = false; el.next.disabled = true;
 
+                        function finishGame() {
+                            const total = state.rounds.length || 0;
+                            const summary = {
+                                score: state.score,
+                                total,
+                                accuracy: total ? Math.round((state.score / total) * 100) : 0,
+                                bestStreak: state.bestStreak,
+                                breakdown: state.breakdown,
+                                ts: Date.now()
+                            };
+                            try {
+                                sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary));
+                            } catch (_) { }
+                            window.location.href = 'results.html';
+                        }
+
+
                         order.forEach((srcIdx, visIdx) => {
                             const img = r.images[srcIdx];
                             const card = document.createElement('button'); card.className = 'card'; card.type = 'button';
@@ -542,6 +569,16 @@
                         }
                         el.score.textContent = `Score: ${state.score}`;
 
+                        // NEW: best streak
+                        if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
+
+                        // NEW: per-category breakdown
+                        const cat = r?.category || 'all';
+                        if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
+                        state.breakdown[cat].total++;
+                        if (pickedIsAI) state.breakdown[cat].correct++;
+
+
                         // Toast on 3+ correct AI picks in a row
                         if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
 
@@ -588,7 +625,40 @@
                     }
 
 
-                    function doNext() { if (!current()) return; state.i++; render(); }
+                    function doNext() {
+                        if (!current()) return;
+                        // If the next step would go past the final round, finish instead.
+                        if (state.i >= state.rounds.length - 1) {
+                            finishGame();
+                            return;
+                        }
+                        state.i++;
+                        render();
+                    }
+
+
+                    function finishGame() {
+                        const total = state.rounds.length || 0;
+                        const summary = {
+                            score: state.score,
+                            total,
+                            accuracy: total ? Math.round((state.score / total) * 100) : 0,
+                            bestStreak: state.bestStreak,
+                            breakdown: state.breakdown,
+                            ts: Date.now()
+                        };
+                        try {
+                            sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary));
+                        } catch (_) { }
+                        window.location.href = 'results.html';
+                        if (!r) {
+                            finishGame();  // instead of the "All done!" UI
+                            return;
+                        }
+
+                    }
+
+
 
                     el.reveal.addEventListener('click', doReveal);
                     el.next.addEventListener('click', doNext);
