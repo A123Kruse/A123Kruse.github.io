@@ -296,18 +296,26 @@
             </div>
 
             <script>
-
-
                 (function () {
+                    // ---------- Shorthand ----------
                     const $ = (s, r = document) => r.querySelector(s);
                     const el = {
                         streakPop: $('#streakPop'),
                         streakCount: $('#streakCount'),
-                        cards: $('#cards'), progress: $('#progress'), score: $('#scorePill'), round: $('#roundPill'),
-                        reveal: $('#revealBtn'), next: $('#nextBtn'), restart: $('#restartBtn'),
-                        status: $('#status'), error: $('#error'), categoryNote: $('#categoryNote'), aria: $('#ariaLive')
+                        cards: $('#cards'),
+                        progress: $('#progress'),
+                        score: $('#scorePill'),
+                        round: $('#roundPill'),
+                        reveal: $('#revealBtn'),
+                        next: $('#nextBtn'),
+                        restart: $('#restartBtn'),
+                        status: $('#status'),
+                        error: $('#error'),
+                        categoryNote: $('#categoryNote'),
+                        aria: $('#ariaLive'),
                     };
 
+                    // ---------- Single source of truth for game state ----------
                     const state = {
                         rounds: [],
                         i: 0,
@@ -315,50 +323,49 @@
                         picked: null,
                         shuffleSides: true,
                         aiStreak: 0,
-                        bestStreak: 0,       // <-- add
-                        breakdown: {}        // <-- add
+                        bestStreak: 0,     // track max streak
+                        breakdown: {},     // per-category {correct,total}
                     };
+                    // (Removed the outer/global `state` that caused shadowing.)  // :contentReference[oaicite:1]{index=1}
 
-                    // -------- Read URL params --------
+                    // ---------- URL params ----------
                     const params = new URLSearchParams(location.search);
-                    const startCat = params.get('cat');  // e.g. "animals" or "landscapes"
-                    // …use startCat to filter or seed your round generator
+                    const startCat = params.get('cat');  // e.g. "animals"
                     state.shuffleSides = params.get('shuffle') !== 'false';
 
-                    // -------- Base-aware URL helper (safe for GitHub Pages) --------
+                    // ---------- Helpers ----------
                     function toURL(p) {
                         if (/^(https?:)?\/\//i.test(p)) return p;
                         const clean = p.replace(/^\//, '');
                         return new URL(clean, document.baseURI).toString();
                     }
 
-                    // -------- Resolve manifest entries to actual image URLs --------
                     function resolveSrc(entry, label, category) {
                         const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
                         if (!v) return '';
                         if (/^(https?:)?\/\//i.test(v)) return v;
                         if (v.startsWith('/')) return toURL(v);
                         if (v.startsWith('images/')) return toURL(v);
-
-                        // If entry already includes a subfolder like "animals/doggy.jpg"
-                        // and your repo stores files under "images/animals/...", build that path:
                         if (v.includes('/') && !v.startsWith('images/')) {
-                            return toURL(`images/${v}`);         // <-- key change
+                            return toURL(`images/${v}`); // keep your “subfolder under images” rule
                         }
-
-                        // Otherwise treat as bare filename and fall back to label+category
                         const folder = label === 'ai' ? 'images/ai' : 'images/real';
                         const catPart = category ? `/${category}` : '';
                         return toURL(`${folder}${catPart}/${v}`);
                     }
-
 
                     function autoAlt(x) {
                         const s = typeof x === 'string' ? x : (x?.file ?? x?.src ?? '');
                         return String(s).split('/').pop().replace(/\.[a-z0-9]+$/i, '').replace(/[-_]/g, ' ');
                     }
 
-                    function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
+                    function shuffle(a) {
+                        for (let i = a.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [a[i], a[j]] = [a[j], a[i]];
+                        }
+                        return a;
+                    }
 
                     function buildRoundsFromCategorizedManifest(m) {
                         const rounds = [];
@@ -373,8 +380,8 @@
                                     category: cat,
                                     images: [
                                         { src: resolveSrc(rEnt, 'real', cat), label: 'real', alt: autoAlt(rEnt) },
-                                        { src: resolveSrc(aEnt, 'ai', cat), label: 'ai', alt: autoAlt(aEnt) }
-                                    ]
+                                        { src: resolveSrc(aEnt, 'ai', cat), label: 'ai', alt: autoAlt(aEnt) },
+                                    ],
                                 });
                             }
                         }
@@ -401,21 +408,17 @@
                             : '';
                     }
 
-                    // keep your existing helpers (toURL, resolveSrc, autoAlt, shuffle, etc.)
-
-                    // 🔎 Normalize and match the ?cat param to a real manifest key
                     function findMatchingCategory(keys, wanted) {
-                        const w = String(wanted).trim().toLowerCase();
-                        // exact (case-insensitive)
+                        const w = String(wanted || '').trim().toLowerCase();
                         let hit = keys.find(k => k.toLowerCase() === w);
                         if (hit) return hit;
-                        // relaxed match: ignore spaces/underscores/dashes
                         const norm = s => s.toLowerCase().replace(/[\s_-]+/g, '');
                         const w2 = norm(w);
                         hit = keys.find(k => norm(k) === w2);
                         return hit || null;
                     }
 
+                    // ---------- Boot ----------
                     start();
                     async function start() {
                         try {
@@ -423,21 +426,13 @@
                             if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
                             const manifest = await res.json();
 
-                            // 🏷️ Read ?cat from URL and filter if valid
-                            const url = new URL(window.location.href);
-                            const catParam = url.searchParams.get('cat');
-                            let selectedCat = null;
-                            if (catParam) {
-                                selectedCat = findMatchingCategory(Object.keys(manifest || {}), catParam);
-                            }
-
-                            // Use either the single-category subset or the whole manifest
+                            // Apply ?cat filter if valid
+                            const catParam = new URL(window.location.href).searchParams.get('cat');
+                            let selectedCat = catParam ? findMatchingCategory(Object.keys(manifest || {}), catParam) : null;
                             const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
 
-                            // Build rounds
                             state.rounds = buildRoundsFromCategorizedManifest(manifestToUse);
                             if (!state.rounds.length) {
-                                // If a wrong ?cat was passed, retry with all categories
                                 if (selectedCat) {
                                     state.rounds = buildRoundsFromCategorizedManifest(manifest);
                                     el.error.textContent = `No rounds found for category "${catParam}". Showing all categories instead.`;
@@ -463,8 +458,19 @@
                         }
                     }
 
+                    // ---------- Game core ----------
+                    function resetGame() {
+                        state.i = 0;
+                        state.score = 0;
+                        state.picked = null;
+                        state.aiStreak = 0;
+                        state.bestStreak = 0;
+                        state.breakdown = {};
+                        el.restart.style.display = 'none';
+                        render();
+                        updateMeta();
+                    }
 
-                    function resetGame() { state.i = 0; state.score = 0; state.picked = null; el.restart.style.display = 'none'; render(); updateMeta(); }
                     function updateMeta() {
                         el.score.textContent = `Score: ${state.score}`;
                         el.round.textContent = `Round: ${Math.min(state.i + 1, state.rounds.length)} / ${state.rounds.length}`;
@@ -472,59 +478,66 @@
                         el.progress.style.width = pct + '%';
                         el.progress.parentElement.setAttribute('aria-valuenow', String(pct));
                     }
+
                     function current() { return state.rounds[state.i]; }
 
                     function render() {
                         const r = current();
                         if (!r) {
-                            el.cards.innerHTML = ''; el.status.innerHTML = `<strong>All done!</strong> You scored ${state.score} / ${state.rounds.length}.`;
-                            el.categoryNote.textContent = ''; el.reveal.disabled = true; el.next.disabled = true; el.restart.style.display = 'inline-block';
-                            el.progress.style.width = '100%'; return;
-                        }
-                        let order = [0, 1]; if (state.shuffleSides) shuffle(order);
-                        el.cards.innerHTML = ''; el.error.textContent = ''; el.status.textContent = `Round ${state.i + 1}`; el.categoryNote.textContent = `Category: ${r.category}`;
-                        state.picked = null; el.reveal.disabled = false; el.next.disabled = true;
-
-                        function finishGame() {
-                            const total = state.rounds.length || 0;
-
-                            // Try current round, then last round, then URL ?cat
-                            const urlCat = new URLSearchParams(location.search).get('cat') || '';
-                            const lastPlayed = state.rounds[state.i] || state.rounds[total - 1] || null;
-                            const lastCategory = (lastPlayed && lastPlayed.category) ? lastPlayed.category : urlCat;
-
-                            const categories = Object.keys(state.breakdown || {});
-                            const summary = {
-                                score: state.score,
-                                total,
-                                accuracy: total ? Math.round((state.score / total) * 100) : 0,
-                                bestStreak: state.bestStreak,
-                                breakdown: state.breakdown,
-                                lastCategory,                 // <-- critical
-                                categories,
-                                ts: Date.now()
-                            };
-                            try { sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary)); } catch { }
-                            window.location.href = 'results.html';
+                            el.cards.innerHTML = '';
+                            el.status.innerHTML = `<strong>All done!</strong> You scored ${state.score} / ${state.rounds.length}.`;
+                            el.categoryNote.textContent = '';
+                            el.reveal.disabled = true;
+                            el.next.disabled = true;
+                            el.restart.style.display = 'inline-block';
+                            el.progress.style.width = '100%';
+                            return;
                         }
 
+                        let order = [0, 1];
+                        if (state.shuffleSides) shuffle(order);
 
-
-
+                        el.cards.innerHTML = '';
+                        el.error.textContent = '';
+                        el.status.textContent = `Round ${state.i + 1}`;
+                        el.categoryNote.textContent = `Category: ${r.category}`;
+                        state.picked = null;
+                        el.reveal.disabled = false;
+                        el.next.disabled = true;
 
                         order.forEach((srcIdx, visIdx) => {
                             const img = r.images[srcIdx];
-                            const card = document.createElement('button'); card.className = 'card'; card.type = 'button';
-                            card.dataset.visualIndex = String(visIdx); card.dataset.srcIndex = String(srcIdx);
+                            const card = document.createElement('button');
+                            card.className = 'card';
+                            card.type = 'button';
+                            card.dataset.visualIndex = String(visIdx);
+                            card.dataset.srcIndex = String(srcIdx);
                             card.setAttribute('aria-label', `Image ${visIdx === 0 ? 'A' : 'B'} — choose if this is AI-generated`);
-                            const label = document.createElement('div'); label.className = 'label'; label.textContent = visIdx === 0 ? 'A' : 'B';
-                            const frame = document.createElement('div'); frame.className = 'frame';
-                            const tag = document.createElement('img'); tag.src = img.src; tag.alt = img.alt; frame.appendChild(tag);
-                            const pick = document.createElement('div'); pick.className = 'pick';
-                            const guess = document.createElement('button'); guess.className = 'btn'; guess.type = 'button'; guess.textContent = 'This is AI';
+
+                            const label = document.createElement('div');
+                            label.className = 'label';
+                            label.textContent = visIdx === 0 ? 'A' : 'B';
+
+                            const frame = document.createElement('div');
+                            frame.className = 'frame';
+                            const tag = document.createElement('img');
+                            tag.src = img.src;
+                            tag.alt = img.alt;
+                            frame.appendChild(tag);
+
+                            const pick = document.createElement('div');
+                            pick.className = 'pick';
+                            const guess = document.createElement('button');
+                            guess.className = 'btn';
+                            guess.type = 'button';
+                            guess.textContent = 'This is AI';
                             guess.addEventListener('click', e => { e.stopPropagation(); choose(visIdx); });
                             pick.appendChild(guess);
-                            const overlay = document.createElement('div'); overlay.className = 'reveal'; overlay.innerHTML = `<span class="chip">${img.label.toUpperCase()}</span>`;
+
+                            const overlay = document.createElement('div');
+                            overlay.className = 'reveal';
+                            overlay.innerHTML = `<span class="chip">${img.label.toUpperCase()}</span>`;
+
                             card.append(label, frame, pick, overlay);
                             card.addEventListener('click', () => choose(visIdx));
                             el.cards.appendChild(card);
@@ -543,16 +556,19 @@
                     function choose(visIdx) {
                         if (!current()) return;
                         el.cards.querySelectorAll('.card').forEach(c => c.style.borderColor = 'var(--ring)');
-                        const card = el.cards.querySelector(`.card[data-visual-index="${visIdx}"]`); if (!card) return;
-                        state.picked = visIdx; card.style.borderColor = 'var(--accent)';
+                        const card = el.cards.querySelector(`.card[data-visual-index="${visIdx}"]`);
+                        if (!card) return;
+                        state.picked = visIdx;
+                        card.style.borderColor = 'var(--accent)';
                         el.status.textContent = `Selected ${visIdx === 0 ? 'A' : 'B'}. Click Reveal or press R.`;
                     }
 
+                    // ---------- Fixed doReveal (no duplicate `const cat`) ----------
                     function doReveal() {
                         const r = current();
                         if (!r) return;
 
-                        // Ensure breakdown object exists
+                        // Ensure breakdown exists for this category
                         state.breakdown = state.breakdown || {};
                         const cat = r?.category || 'all';
                         if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
@@ -563,12 +579,12 @@
                             return;
                         }
 
-                        // Determine if the selected visual index corresponds to the AI image
+                        // Determine if picked is the AI image
                         const selCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
                         const srcIndex = selCard ? Number(selCard.dataset.srcIndex) : -1;
                         const pickedIsAI = srcIndex >= 0 ? (r.images[srcIndex]?.label === 'ai') : false;
 
-                        // Show overlays on both cards and highlight the AI chip
+                        // Reveal overlays and highlight AI chip
                         el.cards.querySelectorAll('.reveal').forEach(ov => ov.classList.add('show'));
                         el.cards.querySelectorAll('.card').forEach(card => {
                             const chip = card.querySelector('.reveal .chip');
@@ -589,21 +605,21 @@
                         }
                         el.score.textContent = `Score: ${state.score}`;
 
-                        // Track best streak
+                        // Best streak
                         if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
 
                         // Per-category breakdown
                         state.breakdown[cat].total++;
                         if (pickedIsAI) state.breakdown[cat].correct++;
 
-                        // 🔥 Show streak toast for 3+ correct in a row
+                        // Streak toast
                         if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
 
                         // Enable Next; disable Reveal
                         el.next.disabled = false;
                         el.reveal.disabled = true;
 
-                        // ARIA live region update
+                        // ARIA update
                         if (el.aria) {
                             el.aria.textContent = pickedIsAI
                                 ? 'Correct. You chose the AI image.'
@@ -611,15 +627,14 @@
                         }
                     }
 
-
-
                     function fireStreakToast(count) {
                         const pop = el.streakPop;
-                        const conf = pop.querySelector('.confetti');
+                        const conf = pop?.querySelector('.confetti');
                         if (!pop || !conf) return;
 
                         el.streakCount.textContent = String(count);
 
+                        // confetti
                         conf.innerHTML = '';
                         const N = 42;
                         for (let i = 0; i < N; i++) {
@@ -634,7 +649,7 @@
                         }
 
                         pop.hidden = false;
-                        void pop.offsetWidth; // force reflow
+                        void pop.offsetWidth;       // force reflow
                         pop.classList.add('show');
 
                         setTimeout(() => {
@@ -643,10 +658,8 @@
                         }, 1400);
                     }
 
-
                     function doNext() {
                         if (!current()) return;
-                        // If the next step would go past the final round, finish instead.
                         if (state.i >= state.rounds.length - 1) {
                             finishGame();
                             return;
@@ -655,14 +668,36 @@
                         render();
                     }
 
+                    // ---------- Single, final finishGame ----------
+                    function finishGame() {
+                        const total = state.rounds.length || 0;
 
+                        // figure out last category for "Play again" routing on results page
+                        const lastPlayed = state.rounds[state.i] || state.rounds[total - 1] || null;
+                        const urlCat = new URLSearchParams(location.search).get('cat') || '';
+                        const lastCategory = (lastPlayed && lastPlayed.category) ? lastPlayed.category : urlCat;
+
+                        const summary = {
+                            score: state.score,
+                            total,
+                            accuracy: total ? Math.round((state.score / total) * 100) : 0,
+                            bestStreak: state.bestStreak,
+                            breakdown: state.breakdown,
+                            lastCategory,
+                            categories: Object.keys(state.breakdown || {}),
+                            ts: Date.now(),
+                        };
+                        try { sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary)); } catch { }
+                        window.location.href = 'results.html';
+                    }
+
+                    // ---------- Events ----------
                     el.reveal.addEventListener('click', doReveal);
                     el.next.addEventListener('click', doNext);
                     el.restart.addEventListener('click', resetGame);
                 })();
-
-
             </script>
+
 
 
 
