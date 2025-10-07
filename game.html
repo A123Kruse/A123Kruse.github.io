@@ -593,12 +593,6 @@
                         // NEW: best streak
                         if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
 
-                        // NEW: per-category breakdown
-                        const cat = r?.category || 'all';
-                        if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
-                        state.breakdown[cat].total++;
-                        if (pickedIsAI) state.breakdown[cat].correct++;
-
 
                         // Toast on 3+ correct AI picks in a row
                         if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
