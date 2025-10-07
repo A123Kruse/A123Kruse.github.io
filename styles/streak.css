@@ -64,3 +64,20 @@
         animation: none;
     }
 }
+
+
+/* DEBUG override to ensure popup is visible */
+.streak-pop {
+    background: rgba(0,0,0,.2) !important;
+    z-index: 99999 !important;
+}
+
+    .streak-pop.show,
+    .streak-pop .toast {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+.streak-pop .confetti {
+  display: none !important;
+}

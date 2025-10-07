@@ -613,7 +613,13 @@
                         if (pickedIsAI) state.breakdown[cat].correct++;
 
                         // Streak toast
-                        if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
+                        // 🔥 Show streak toast for 3+ correct in a row (with debug logs)
+                        console.log('[reveal] pickedIsAI=', pickedIsAI, 'aiStreak=', state.aiStreak);
+                        if (state.aiStreak >= 3) {
+                            console.log('[reveal] showing toast now');
+                            fireStreakToast(state.aiStreak);
+                        }
+
 
                         // Enable Next; disable Reveal
                         el.next.disabled = false;
@@ -657,6 +663,10 @@
                             setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
                         }, 1400);
                     }
+
+                    // ✅ DEBUG: expose toast for manual trigger in console
+                    window.__toast = fireStreakToast;
+
 
                     function doNext() {
                         if (!current()) return;
