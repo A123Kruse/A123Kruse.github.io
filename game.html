@@ -316,8 +316,21 @@
                         status: $('#status'), error: $('#error'), categoryNote: $('#categoryNote'), aria: $('#ariaLive')
                     };
 
-                    const state = { rounds: [], i: 0, score: 0, picked: null, shuffleSides: true, aiStreak: 0 };
+                    const state = {
+                        rounds: [],
+                        i: 0,
+                        score: 0,
+                        picked: null,
+                        shuffleSides: true,
+                        aiStreak: 0,
+                        bestStreak: 0,       // <-- add
+                        breakdown: {}        // <-- add
+                    };
+
+                    // -------- Read URL params --------
                     const params = new URLSearchParams(location.search);
+                    const startCat = params.get('cat');  // e.g. "animals" or "landscapes"
+                    // …use startCat to filter or seed your round generator
                     state.shuffleSides = params.get('shuffle') !== 'false';
 
                     // -------- Base-aware URL helper (safe for GitHub Pages) --------
@@ -482,19 +495,29 @@
 
                         function finishGame() {
                             const total = state.rounds.length || 0;
+
+                            // Try current round, then last round, then URL ?cat
+                            const urlCat = new URLSearchParams(location.search).get('cat') || '';
+                            const lastPlayed = state.rounds[state.i] || state.rounds[total - 1] || null;
+                            const lastCategory = (lastPlayed && lastPlayed.category) ? lastPlayed.category : urlCat;
+
+                            const categories = Object.keys(state.breakdown || {});
                             const summary = {
                                 score: state.score,
                                 total,
                                 accuracy: total ? Math.round((state.score / total) * 100) : 0,
                                 bestStreak: state.bestStreak,
                                 breakdown: state.breakdown,
+                                lastCategory,                 // <-- critical
+                                categories,
                                 ts: Date.now()
                             };
-                            try {
-                                sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary));
-                            } catch (_) { }
+                            try { sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary)); } catch { }
                             window.location.href = 'results.html';
                         }
+
+
+
 
 
                         order.forEach((srcIdx, visIdx) => {
@@ -536,6 +559,12 @@
                     function doReveal() {
                         const r = current();
                         if (!r) return;
+
+                        // before using it:
+                        state.breakdown = state.breakdown || {};
+                        const cat = r?.category || 'all';
+                        if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
+
 
                         // Require a selection
                         if (state.picked === null || state.picked === undefined) {
