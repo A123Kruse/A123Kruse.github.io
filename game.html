@@ -640,7 +640,6 @@
 
                         el.streakCount.textContent = String(count);
 
-                        // confetti
                         conf.innerHTML = '';
                         const N = 42;
                         for (let i = 0; i < N; i++) {
@@ -655,7 +654,7 @@
                         }
 
                         pop.hidden = false;
-                        void pop.offsetWidth;       // force reflow
+                        void pop.offsetWidth;
                         pop.classList.add('show');
 
                         setTimeout(() => {
@@ -666,6 +665,7 @@
 
                     // ✅ DEBUG: expose toast for manual trigger in console
                     window.__toast = fireStreakToast;
+
 
 
                     function doNext() {
