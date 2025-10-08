@@ -326,7 +326,6 @@
                         bestStreak: 0,     // track max streak
                         breakdown: {},     // per-category {correct,total}
                     };
-                    // (Removed the outer/global `state` that caused shadowing.)  // :contentReference[oaicite:1]{index=1}
 
                     // ---------- URL params ----------
                     const params = new URLSearchParams(location.search);
@@ -347,7 +346,7 @@
                         if (v.startsWith('/')) return toURL(v);
                         if (v.startsWith('images/')) return toURL(v);
                         if (v.includes('/') && !v.startsWith('images/')) {
-                            return toURL(`images/${v}`); // keep your “subfolder under images” rule
+                            return toURL(`images/${v}`);
                         }
                         const folder = label === 'ai' ? 'images/ai' : 'images/real';
                         const catPart = category ? `/${category}` : '';
@@ -360,7 +359,7 @@
                     }
 
                     function shuffle(a) {
-                        for (let i = a.length - 1; i > 0; i--) {
+                        for (let i = a.length - 1; i > 0; i++) {
                             const j = Math.floor(Math.random() * (i + 1));
                             [a[i], a[j]] = [a[j], a[i]];
                         }
@@ -563,7 +562,7 @@
                         el.status.textContent = `Selected ${visIdx === 0 ? 'A' : 'B'}. Click Reveal or press R.`;
                     }
 
-                    // ---------- Fixed doReveal (no duplicate `const cat`) ----------
+                    // ---------- Hardened doReveal ----------
                     function doReveal() {
                         const r = current();
                         if (!r) return;
@@ -615,7 +614,7 @@
                         b.total += 1;
                         if (pickedIsAI) b.correct += 1;
 
-                        // Streak toast (keep your debug log if you like)
+                        // Streak toast
                         if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
 
                         // Enable Next; disable Reveal
@@ -629,7 +628,6 @@
                                 : 'Incorrect. The other image was AI.';
                         }
                     }
-
 
                     function fireStreakToast(count) {
                         const pop = el.streakPop;
@@ -652,7 +650,7 @@
                         }
 
                         pop.hidden = false;
-                        void pop.offsetWidth;
+                        void pop.offsetWidth;       // force reflow
                         pop.classList.add('show');
 
                         setTimeout(() => {
@@ -661,14 +659,8 @@
                         }, 1400);
                     }
 
-                    // ✅ DEBUG: expose toast for manual trigger in console
+                    // DEBUG: expose toast for manual trigger in console (type: __toast(4))
                     window.__toast = fireStreakToast;
-
-
-                    // ✅ DEBUG: expose toast for manual trigger in console
-                    window.__toast = fireStreakToast;
-
-
 
                     function doNext() {
                         if (!current()) return;
@@ -709,6 +701,7 @@
                     el.restart.addEventListener('click', resetGame);
                 })();
             </script>
+
 
 
 
