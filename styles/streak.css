@@ -1,3 +1,11 @@
+/* safety override */
+.streak-pop {
+    z-index: 99999 !important;
+    position: fixed !important;
+    inset: 0 !important;
+}
+
+
 /* ——— Streak popup (toast + confetti) ——— */
 .streak-pop {
     position: fixed;
