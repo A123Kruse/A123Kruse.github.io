@@ -568,10 +568,12 @@
                         const r = current();
                         if (!r) return;
 
-                        // Ensure breakdown exists for this category
-                        state.breakdown = state.breakdown || {};
-                        const cat = r?.category || 'all';
-                        if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
+                        // Ensure breakdown object & bucket exist — fully guarded
+                        if (!state.breakdown || typeof state.breakdown !== 'object') state.breakdown = {};
+                        const cat = String(r?.category ?? 'all');
+                        if (!state.breakdown[cat] || typeof state.breakdown[cat] !== 'object') {
+                            state.breakdown[cat] = { correct: 0, total: 0 };
+                        }
 
                         // Require a selection
                         if (state.picked === null || state.picked === undefined) {
@@ -608,18 +610,13 @@
                         // Best streak
                         if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
 
-                        // Per-category breakdown
-                        state.breakdown[cat].total++;
-                        if (pickedIsAI) state.breakdown[cat].correct++;
+                        // Per-category breakdown (use a stable local reference)
+                        const b = state.breakdown[cat];
+                        b.total += 1;
+                        if (pickedIsAI) b.correct += 1;
 
-                        // Streak toast
-                        // 🔥 Show streak toast for 3+ correct in a row (with debug logs)
-                        console.log('[reveal] pickedIsAI=', pickedIsAI, 'aiStreak=', state.aiStreak);
-                        if (state.aiStreak >= 3) {
-                            console.log('[reveal] showing toast now');
-                            fireStreakToast(state.aiStreak);
-                        }
-
+                        // Streak toast (keep your debug log if you like)
+                        if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
 
                         // Enable Next; disable Reveal
                         el.next.disabled = false;
@@ -632,6 +629,7 @@
                                 : 'Incorrect. The other image was AI.';
                         }
                     }
+
 
                     function fireStreakToast(count) {
                         const pop = el.streakPop;
