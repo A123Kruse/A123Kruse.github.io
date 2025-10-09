@@ -297,13 +297,16 @@
 
             <script>
                 (function () {
-                    // Always define __toast immediately (stub), and log that the script started
+                    // --- Boot diagnostics ---
                     window.__toast = (n) => console.warn('[toast stub] not ready yet:', n);
                     console.log('[game] inline script started');
 
+                    // Log any boot-blocking errors
                     window.addEventListener('error', (e) => {
-                        console.error('[game boot error]', e.message, e.filename, e.lineno, e.colno);
+                        console.error('[game boot error]', e.message, 'at', e.filename, 'line', e.lineno);
                     });
+                    // --- End diagnostics ---
+
 
                     (function () {
                         // ---------- Shorthand ----------
