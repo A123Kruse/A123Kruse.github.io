@@ -283,6 +283,24 @@
                 <div class="confetti" aria-hidden="true"></div>
             </div>
 
+            <!-- Toast guard -->
+            <script>
+                // visible version tag to prove you’re on the right file:
+                console.log('[guard] toast stub installed v1');
+
+                // Minimal stub so manual testing never throws
+                window.__toast = (n) => {
+                    const pop = document.getElementById('streakPop');
+                    const count = document.getElementById('streakCount');
+                    if (!pop) return console.warn('[toast] #streakPop not found');
+                    if (count) count.textContent = String(n ?? 3);
+                    pop.hidden = true; pop.hidden = false; void pop.offsetWidth;
+                    pop.classList.add('show');
+                    setTimeout(() => { pop.classList.remove('show'); setTimeout(() => (pop.hidden = true), 220); }, 1400);
+                };
+            </script>
+
+
             <script>
                 /* -------- Boot diagnostics: make __toast exist immediately -------- */
                 window.__toast = (n) =>
