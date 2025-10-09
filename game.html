@@ -284,25 +284,11 @@
             </div>
 
             <!-- Toast guard -->
+            <!-- Guard: toast + Next button (keep this BEFORE the main script) -->
             <script>
-                // visible version tag to prove you’re on the right file:
-                console.log('[guard] toast stub installed v1');
+                console.log('[guard] v2');
 
-                // Minimal stub so manual testing never throws
-                window.__toast = (n) => {
-                    const pop = document.getElementById('streakPop');
-                    const count = document.getElementById('streakCount');
-                    if (!pop) return console.warn('[toast] #streakPop not found');
-                    if (count) count.textContent = String(n ?? 3);
-                    pop.hidden = true; pop.hidden = false; void pop.offsetWidth;
-                    pop.classList.add('show');
-                    setTimeout(() => { pop.classList.remove('show'); setTimeout(() => (pop.hidden = true), 220); }, 1400);
-                };
-            </script>
-
-            <!-- --- GUARD SCRIPTS (place BEFORE main script) --- -->
-            <script>
-                // Guard #1: Always define a fallback __toast (for sanity checks)
+                // Fallback toast so __toast never throws (manual sanity checks)
                 window.__toast = (n = 3) => {
                     const pop = document.getElementById('streakPop');
                     const conf = pop?.querySelector('.confetti');
@@ -310,7 +296,7 @@
                     if (!pop || !conf) return console.warn('[toast] popup not found');
                     if (count) count.textContent = String(n);
                     conf.innerHTML = '';
-                    for (let i = 0; i < 40; i++) {
+                    for (let i = 0; i < 36; i++) {
                         const piece = document.createElement('i');
                         piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
                         piece.style.setProperty('--t', String(900 + Math.random() * 700));
@@ -319,25 +305,31 @@
                     }
                     pop.hidden = true; pop.hidden = false; void pop.offsetWidth;
                     pop.classList.add('show');
-                    setTimeout(() => {
-                        pop.classList.remove('show');
-                        setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
-                    }, 1400);
+                    setTimeout(() => { pop.classList.remove('show'); setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220); }, 1400);
                 };
 
-                // Guard #2: Make Next button trigger the same logic as pressing "N"
+                // Keep the button and the keyboard shortcut in lockstep
                 window.addEventListener('DOMContentLoaded', () => {
                     const next = document.getElementById('nextBtn');
-                    if (!next) return;
-                    next.addEventListener('click', () => {
-                        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
-                    });
+                    if (next) next.addEventListener('click', () =>
+                        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }))
+                    );
                 });
             </script>
+
             <!-- --- END GUARD SCRIPTS --- -->
 
 
             <script>
+
+                // Show exact boot errors on screen + console (helps with "Invalid array length")
+                window.addEventListener('error', (e) => {
+                    const box = document.getElementById('error');
+                    if (box) box.textContent = `${e.message} @ ${e.filename?.split('/').pop()}:${e.lineno}`;
+                    console.error('[boot error]', e.error || e.message, e);
+                });
+
+
                 /* -------- Boot diagnostics: make __toast exist immediately -------- */
                 window.__toast = (n) =>
                     window.__fireStreakToast
