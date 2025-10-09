@@ -296,16 +296,13 @@
             </div>
 
             <script>
-                (function () {
-                    // --- Boot diagnostics ---
-                    window.__toast = (n) => console.warn('[toast stub] not ready yet:', n);
-                    console.log('[game] inline script started');
 
-                    // Log any boot-blocking errors
-                    window.addEventListener('error', (e) => {
-                        console.error('[game boot error]', e.message, 'at', e.filename, 'line', e.lineno);
-                    });
-                    // --- End diagnostics ---
+                // Always expose a safe global for manual testing (works even before main code finishes)
+                window.__toast = (n) =>
+                    window.__fireStreakToast
+                        ? window.__fireStreakToast(n)
+                        : console.warn('[toast] not ready yet:', n);
+                console.log('[game] inline script started');
 
 
                     (function () {
@@ -581,23 +578,24 @@
                             const r = current();
                             if (!r) return;
 
-                            // Ensure breakdown object & bucket exist — fully guarded
+                            // Require a selection (prevents null errors later)
+                            if (state.picked === null || state.picked === undefined) {
+                                el.status.textContent = 'Pick A or B first, then click Reveal (or press R).';
+                                return;
+                            }
+
+                            // Ensure breakdown object & bucket exist
                             if (!state.breakdown || typeof state.breakdown !== 'object') state.breakdown = {};
                             const cat = String(r?.category ?? 'all');
                             if (!state.breakdown[cat] || typeof state.breakdown[cat] !== 'object') {
                                 state.breakdown[cat] = { correct: 0, total: 0 };
                             }
 
-                            // Require a selection
-                            if (state.picked === null || state.picked === undefined) {
-                                el.status.textContent = 'Pick A or B first, then click Reveal (or press R).';
-                                return;
-                            }
-
-                            // Determine if picked is the AI image
+                            // Safe card lookup (avoids .dataset on null)
                             const selCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
-                            const srcIndex = selCard ? Number(selCard.dataset.srcIndex) : -1;
+                            const srcIndex = selCard && selCard.dataset ? Number(selCard.dataset.srcIndex) : -1;
                             const pickedIsAI = srcIndex >= 0 ? (r.images[srcIndex]?.label === 'ai') : false;
+                        
 
                             // Reveal overlays and highlight AI chip
                             el.cards.querySelectorAll('.reveal').forEach(ov => ov.classList.add('show'));
@@ -673,8 +671,11 @@
                             }, 1400);
                         }
 
-                        // DEBUG: expose toast for manual trigger in console (type: __toast(4))
+                        // publish the real impl and replace the stub
+                        window.__fireStreakToast = fireStreakToast;
                         window.__toast = fireStreakToast;
+
+
 
                         function doNext() {
                             if (!current()) return;
