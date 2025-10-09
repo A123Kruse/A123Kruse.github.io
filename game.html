@@ -370,7 +370,9 @@
                         const rounds = [];
                         for (const cat of Object.keys(m || {})) {
                             const real = Array.isArray(m[cat]?.real) ? [...m[cat].real] : [];
+                            // fix
                             const ai = Array.isArray(m[cat]?.ai) ? [...m[cat].ai] : [];
+
                             shuffle(real); shuffle(ai);
                             const n = Math.min(real.length, ai.length);
                             for (let k = 0; k < n; k++) {
