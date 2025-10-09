@@ -297,411 +297,420 @@
 
             <script>
                 (function () {
-                    // ---------- Shorthand ----------
-                    const $ = (s, r = document) => r.querySelector(s);
-                    const el = {
-                        streakPop: $('#streakPop'),
-                        streakCount: $('#streakCount'),
-                        cards: $('#cards'),
-                        progress: $('#progress'),
-                        score: $('#scorePill'),
-                        round: $('#roundPill'),
-                        reveal: $('#revealBtn'),
-                        next: $('#nextBtn'),
-                        restart: $('#restartBtn'),
-                        status: $('#status'),
-                        error: $('#error'),
-                        categoryNote: $('#categoryNote'),
-                        aria: $('#ariaLive'),
-                    };
+                    // Always define __toast immediately (stub), and log that the script started
+                    window.__toast = (n) => console.warn('[toast stub] not ready yet:', n);
+                    console.log('[game] inline script started');
 
-                    // ---------- Single source of truth for game state ----------
-                    const state = {
-                        rounds: [],
-                        i: 0,
-                        score: 0,
-                        picked: null,
-                        shuffleSides: true,
-                        aiStreak: 0,
-                        bestStreak: 0,     // track max streak
-                        breakdown: {},     // per-category {correct,total}
-                    };
+                    window.addEventListener('error', (e) => {
+                        console.error('[game boot error]', e.message, e.filename, e.lineno, e.colno);
+                    });
 
-                    // ---------- URL params ----------
-                    const params = new URLSearchParams(location.search);
-                    const startCat = params.get('cat');  // e.g. "animals"
-                    state.shuffleSides = params.get('shuffle') !== 'false';
+                    (function () {
+                        // ---------- Shorthand ----------
+                        const $ = (s, r = document) => r.querySelector(s);
+                        const el = {
+                            streakPop: $('#streakPop'),
+                            streakCount: $('#streakCount'),
+                            cards: $('#cards'),
+                            progress: $('#progress'),
+                            score: $('#scorePill'),
+                            round: $('#roundPill'),
+                            reveal: $('#revealBtn'),
+                            next: $('#nextBtn'),
+                            restart: $('#restartBtn'),
+                            status: $('#status'),
+                            error: $('#error'),
+                            categoryNote: $('#categoryNote'),
+                            aria: $('#ariaLive'),
+                        };
 
-                    // ---------- Helpers ----------
-                    function toURL(p) {
-                        if (/^(https?:)?\/\//i.test(p)) return p;
-                        const clean = p.replace(/^\//, '');
-                        return new URL(clean, document.baseURI).toString();
-                    }
+                        // ---------- Single source of truth for game state ----------
+                        const state = {
+                            rounds: [],
+                            i: 0,
+                            score: 0,
+                            picked: null,
+                            shuffleSides: true,
+                            aiStreak: 0,
+                            bestStreak: 0,     // track max streak
+                            breakdown: {},     // per-category {correct,total}
+                        };
 
-                    function resolveSrc(entry, label, category) {
-                        const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
-                        if (!v) return '';
-                        if (/^(https?:)?\/\//i.test(v)) return v;
-                        if (v.startsWith('/')) return toURL(v);
-                        if (v.startsWith('images/')) return toURL(v);
-                        if (v.includes('/') && !v.startsWith('images/')) {
-                            return toURL(`images/${v}`);
+                        // ---------- URL params ----------
+                        const params = new URLSearchParams(location.search);
+                        const startCat = params.get('cat');  // e.g. "animals"
+                        state.shuffleSides = params.get('shuffle') !== 'false';
+
+                        // ---------- Helpers ----------
+                        function toURL(p) {
+                            if (/^(https?:)?\/\//i.test(p)) return p;
+                            const clean = p.replace(/^\//, '');
+                            return new URL(clean, document.baseURI).toString();
                         }
-                        const folder = label === 'ai' ? 'images/ai' : 'images/real';
-                        const catPart = category ? `/${category}` : '';
-                        return toURL(`${folder}${catPart}/${v}`);
-                    }
 
-                    function autoAlt(x) {
-                        const s = typeof x === 'string' ? x : (x?.file ?? x?.src ?? '');
-                        return String(s).split('/').pop().replace(/\.[a-z0-9]+$/i, '').replace(/[-_]/g, ' ');
-                    }
-
-                    function shuffle(a) {
-                        for (let i = a.length - 1; i > 0; i++) {
-                            const j = Math.floor(Math.random() * (i + 1));
-                            [a[i], a[j]] = [a[j], a[i]];
-                        }
-                        return a;
-                    }
-
-                    function buildRoundsFromCategorizedManifest(m) {
-                        const rounds = [];
-                        for (const cat of Object.keys(m || {})) {
-                            const real = Array.isArray(m[cat]?.real) ? [...m[cat].real] : [];
-                            // fix
-                            const ai = Array.isArray(m[cat]?.ai) ? [...m[cat].ai] : [];
-
-                            shuffle(real); shuffle(ai);
-                            const n = Math.min(real.length, ai.length);
-                            for (let k = 0; k < n; k++) {
-                                const rEnt = real[k], aEnt = ai[k];
-                                rounds.push({
-                                    category: cat,
-                                    images: [
-                                        { src: resolveSrc(rEnt, 'real', cat), label: 'real', alt: autoAlt(rEnt) },
-                                        { src: resolveSrc(aEnt, 'ai', cat), label: 'ai', alt: autoAlt(aEnt) },
-                                    ],
-                                });
+                        function resolveSrc(entry, label, category) {
+                            const v = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
+                            if (!v) return '';
+                            if (/^(https?:)?\/\//i.test(v)) return v;
+                            if (v.startsWith('/')) return toURL(v);
+                            if (v.startsWith('images/')) return toURL(v);
+                            if (v.includes('/') && !v.startsWith('images/')) {
+                                return toURL(`images/${v}`);
                             }
+                            const folder = label === 'ai' ? 'images/ai' : 'images/real';
+                            const catPart = category ? `/${category}` : '';
+                            return toURL(`${folder}${catPart}/${v}`);
                         }
-                        shuffle(rounds);
-                        return rounds;
-                    }
 
-                    async function preload(rounds) {
-                        const failures = [];
-                        const tasks = [];
-                        for (const r of rounds) {
-                            for (const img of r.images) {
-                                tasks.push(new Promise(res => {
-                                    const im = new Image();
-                                    im.onload = res;
-                                    im.onerror = () => { failures.push(img.src); res(); };
-                                    im.src = img.src;
-                                }));
+                        function autoAlt(x) {
+                            const s = typeof x === 'string' ? x : (x?.file ?? x?.src ?? '');
+                            return String(s).split('/').pop().replace(/\.[a-z0-9]+$/i, '').replace(/[-_]/g, ' ');
+                        }
+
+                        function shuffle(a) {
+                            for (let i = a.length - 1; i > 0; i++) {
+                                const j = Math.floor(Math.random() * (i + 1));
+                                [a[i], a[j]] = [a[j], a[i]];
                             }
+                            return a;
                         }
-                        await Promise.all(tasks);
-                        el.error.innerHTML = failures.length
-                            ? 'Some images failed to load:<br>' + failures.map(u => `<a style="color:#9bd2ff" href="${u}" target="_blank" rel="noreferrer">${u}</a>`).join('<br>')
-                            : '';
-                    }
 
-                    function findMatchingCategory(keys, wanted) {
-                        const w = String(wanted || '').trim().toLowerCase();
-                        let hit = keys.find(k => k.toLowerCase() === w);
-                        if (hit) return hit;
-                        const norm = s => s.toLowerCase().replace(/[\s_-]+/g, '');
-                        const w2 = norm(w);
-                        hit = keys.find(k => norm(k) === w2);
-                        return hit || null;
-                    }
+                        function buildRoundsFromCategorizedManifest(m) {
+                            const rounds = [];
+                            for (const cat of Object.keys(m || {})) {
+                                const real = Array.isArray(m[cat]?.real) ? [...m[cat].real] : [];
+                                // fix
+                                const ai = Array.isArray(m[cat]?.ai) ? [...m[cat].ai] : [];
 
-                    // ---------- Boot ----------
-                    start();
-                    async function start() {
-                        try {
-                            const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
-                            if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
-                            const manifest = await res.json();
-
-                            // Apply ?cat filter if valid
-                            const catParam = new URL(window.location.href).searchParams.get('cat');
-                            let selectedCat = catParam ? findMatchingCategory(Object.keys(manifest || {}), catParam) : null;
-                            const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
-
-                            state.rounds = buildRoundsFromCategorizedManifest(manifestToUse);
-                            if (!state.rounds.length) {
-                                if (selectedCat) {
-                                    state.rounds = buildRoundsFromCategorizedManifest(manifest);
-                                    el.error.textContent = `No rounds found for category "${catParam}". Showing all categories instead.`;
-                                    selectedCat = null;
+                                shuffle(real); shuffle(ai);
+                                const n = Math.min(real.length, ai.length);
+                                for (let k = 0; k < n; k++) {
+                                    const rEnt = real[k], aEnt = ai[k];
+                                    rounds.push({
+                                        category: cat,
+                                        images: [
+                                            { src: resolveSrc(rEnt, 'real', cat), label: 'real', alt: autoAlt(rEnt) },
+                                            { src: resolveSrc(aEnt, 'ai', cat), label: 'ai', alt: autoAlt(aEnt) },
+                                        ],
+                                    });
                                 }
-                                if (!state.rounds.length) throw new Error('No playable rounds (check manifest contents).');
                             }
+                            shuffle(rounds);
+                            return rounds;
+                        }
 
-                            // Show category pill if filtered
-                            const catPill = document.getElementById('catPill');
-                            if (selectedCat && catPill) {
-                                catPill.textContent = `Category: ${selectedCat}`;
-                                catPill.style.display = 'inline-block';
-                            } else if (catPill) {
-                                catPill.style.display = 'none';
+                        async function preload(rounds) {
+                            const failures = [];
+                            const tasks = [];
+                            for (const r of rounds) {
+                                for (const img of r.images) {
+                                    tasks.push(new Promise(res => {
+                                        const im = new Image();
+                                        im.onload = res;
+                                        im.onerror = () => { failures.push(img.src); res(); };
+                                        im.src = img.src;
+                                    }));
+                                }
                             }
-
-                            await preload(state.rounds);
-                            resetGame();
-                        } catch (err) {
-                            el.error.textContent = err.message;
-                            console.error(err);
-                        }
-                    }
-
-                    // ---------- Game core ----------
-                    function resetGame() {
-                        state.i = 0;
-                        state.score = 0;
-                        state.picked = null;
-                        state.aiStreak = 0;
-                        state.bestStreak = 0;
-                        state.breakdown = {};
-                        el.restart.style.display = 'none';
-                        render();
-                        updateMeta();
-                    }
-
-                    function updateMeta() {
-                        el.score.textContent = `Score: ${state.score}`;
-                        el.round.textContent = `Round: ${Math.min(state.i + 1, state.rounds.length)} / ${state.rounds.length}`;
-                        const pct = state.rounds.length ? Math.round((state.i) / state.rounds.length * 100) : 0;
-                        el.progress.style.width = pct + '%';
-                        el.progress.parentElement.setAttribute('aria-valuenow', String(pct));
-                    }
-
-                    function current() { return state.rounds[state.i]; }
-
-                    function render() {
-                        const r = current();
-                        if (!r) {
-                            el.cards.innerHTML = '';
-                            el.status.innerHTML = `<strong>All done!</strong> You scored ${state.score} / ${state.rounds.length}.`;
-                            el.categoryNote.textContent = '';
-                            el.reveal.disabled = true;
-                            el.next.disabled = true;
-                            el.restart.style.display = 'inline-block';
-                            el.progress.style.width = '100%';
-                            return;
+                            await Promise.all(tasks);
+                            el.error.innerHTML = failures.length
+                                ? 'Some images failed to load:<br>' + failures.map(u => `<a style="color:#9bd2ff" href="${u}" target="_blank" rel="noreferrer">${u}</a>`).join('<br>')
+                                : '';
                         }
 
-                        let order = [0, 1];
-                        if (state.shuffleSides) shuffle(order);
-
-                        el.cards.innerHTML = '';
-                        el.error.textContent = '';
-                        el.status.textContent = `Round ${state.i + 1}`;
-                        el.categoryNote.textContent = `Category: ${r.category}`;
-                        state.picked = null;
-                        el.reveal.disabled = false;
-                        el.next.disabled = true;
-
-                        order.forEach((srcIdx, visIdx) => {
-                            const img = r.images[srcIdx];
-                            const card = document.createElement('button');
-                            card.className = 'card';
-                            card.type = 'button';
-                            card.dataset.visualIndex = String(visIdx);
-                            card.dataset.srcIndex = String(srcIdx);
-                            card.setAttribute('aria-label', `Image ${visIdx === 0 ? 'A' : 'B'} — choose if this is AI-generated`);
-
-                            const label = document.createElement('div');
-                            label.className = 'label';
-                            label.textContent = visIdx === 0 ? 'A' : 'B';
-
-                            const frame = document.createElement('div');
-                            frame.className = 'frame';
-                            const tag = document.createElement('img');
-                            tag.src = img.src;
-                            tag.alt = img.alt;
-                            frame.appendChild(tag);
-
-                            const pick = document.createElement('div');
-                            pick.className = 'pick';
-                            const guess = document.createElement('button');
-                            guess.className = 'btn';
-                            guess.type = 'button';
-                            guess.textContent = 'This is AI';
-                            guess.addEventListener('click', e => { e.stopPropagation(); choose(visIdx); });
-                            pick.appendChild(guess);
-
-                            const overlay = document.createElement('div');
-                            overlay.className = 'reveal';
-                            overlay.innerHTML = `<span class="chip">${img.label.toUpperCase()}</span>`;
-
-                            card.append(label, frame, pick, overlay);
-                            card.addEventListener('click', () => choose(visIdx));
-                            el.cards.appendChild(card);
-                        });
-
-                        window.onkeydown = (e) => {
-                            if (e.key.toLowerCase() === 'a') choose(0);
-                            if (e.key.toLowerCase() === 'b') choose(1);
-                            if (e.key.toLowerCase() === 'r') doReveal();
-                            if (e.key.toLowerCase() === 'n') doNext();
-                        };
-
-                        updateMeta();
-                    }
-
-                    function choose(visIdx) {
-                        if (!current()) return;
-                        el.cards.querySelectorAll('.card').forEach(c => c.style.borderColor = 'var(--ring)');
-                        const card = el.cards.querySelector(`.card[data-visual-index="${visIdx}"]`);
-                        if (!card) return;
-                        state.picked = visIdx;
-                        card.style.borderColor = 'var(--accent)';
-                        el.status.textContent = `Selected ${visIdx === 0 ? 'A' : 'B'}. Click Reveal or press R.`;
-                    }
-
-                    // ---------- Hardened doReveal ----------
-                    function doReveal() {
-                        const r = current();
-                        if (!r) return;
-
-                        // Ensure breakdown object & bucket exist — fully guarded
-                        if (!state.breakdown || typeof state.breakdown !== 'object') state.breakdown = {};
-                        const cat = String(r?.category ?? 'all');
-                        if (!state.breakdown[cat] || typeof state.breakdown[cat] !== 'object') {
-                            state.breakdown[cat] = { correct: 0, total: 0 };
+                        function findMatchingCategory(keys, wanted) {
+                            const w = String(wanted || '').trim().toLowerCase();
+                            let hit = keys.find(k => k.toLowerCase() === w);
+                            if (hit) return hit;
+                            const norm = s => s.toLowerCase().replace(/[\s_-]+/g, '');
+                            const w2 = norm(w);
+                            hit = keys.find(k => norm(k) === w2);
+                            return hit || null;
                         }
 
-                        // Require a selection
-                        if (state.picked === null || state.picked === undefined) {
-                            el.status.textContent = 'Pick A or B first, then click Reveal (or press R).';
-                            return;
+                        // ---------- Boot ----------
+                        start();
+                        async function start() {
+                            try {
+                                const res = await fetch(toURL('images/manifest.json'), { cache: 'no-store' });
+                                if (!res.ok) throw new Error(`Could not load images/manifest.json (HTTP ${res.status})`);
+                                const manifest = await res.json();
+
+                                // Apply ?cat filter if valid
+                                const catParam = new URL(window.location.href).searchParams.get('cat');
+                                let selectedCat = catParam ? findMatchingCategory(Object.keys(manifest || {}), catParam) : null;
+                                const manifestToUse = selectedCat ? { [selectedCat]: manifest[selectedCat] } : manifest;
+
+                                state.rounds = buildRoundsFromCategorizedManifest(manifestToUse);
+                                if (!state.rounds.length) {
+                                    if (selectedCat) {
+                                        state.rounds = buildRoundsFromCategorizedManifest(manifest);
+                                        el.error.textContent = `No rounds found for category "${catParam}". Showing all categories instead.`;
+                                        selectedCat = null;
+                                    }
+                                    if (!state.rounds.length) throw new Error('No playable rounds (check manifest contents).');
+                                }
+
+                                // Show category pill if filtered
+                                const catPill = document.getElementById('catPill');
+                                if (selectedCat && catPill) {
+                                    catPill.textContent = `Category: ${selectedCat}`;
+                                    catPill.style.display = 'inline-block';
+                                } else if (catPill) {
+                                    catPill.style.display = 'none';
+                                }
+
+                                await preload(state.rounds);
+                                resetGame();
+                            } catch (err) {
+                                el.error.textContent = err.message;
+                                console.error(err);
+                            }
                         }
 
-                        // Determine if picked is the AI image
-                        const selCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
-                        const srcIndex = selCard ? Number(selCard.dataset.srcIndex) : -1;
-                        const pickedIsAI = srcIndex >= 0 ? (r.images[srcIndex]?.label === 'ai') : false;
-
-                        // Reveal overlays and highlight AI chip
-                        el.cards.querySelectorAll('.reveal').forEach(ov => ov.classList.add('show'));
-                        el.cards.querySelectorAll('.card').forEach(card => {
-                            const chip = card.querySelector('.reveal .chip');
-                            if (!chip) return;
-                            const si = Number(card.dataset.srcIndex);
-                            if (r.images[si]?.label === 'ai') chip.classList.add('win');
-                            else chip.classList.remove('win');
-                        });
-
-                        // Score & streak
-                        if (pickedIsAI) {
-                            state.score++;
-                            state.aiStreak++;
-                            el.status.innerHTML = '<strong>Correct!</strong> You picked the AI image.';
-                        } else {
+                        // ---------- Game core ----------
+                        function resetGame() {
+                            state.i = 0;
+                            state.score = 0;
+                            state.picked = null;
                             state.aiStreak = 0;
-                            el.status.innerHTML = '<strong>Not quite.</strong> The other image is AI.';
-                        }
-                        el.score.textContent = `Score: ${state.score}`;
-
-                        // Best streak
-                        if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
-
-                        // Per-category breakdown (use a stable local reference)
-                        const b = state.breakdown[cat];
-                        b.total += 1;
-                        if (pickedIsAI) b.correct += 1;
-
-                        // Streak toast
-                        if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
-
-                        // Enable Next; disable Reveal
-                        el.next.disabled = false;
-                        el.reveal.disabled = true;
-
-                        // ARIA update
-                        if (el.aria) {
-                            el.aria.textContent = pickedIsAI
-                                ? 'Correct. You chose the AI image.'
-                                : 'Incorrect. The other image was AI.';
-                        }
-                    }
-
-                    function fireStreakToast(count) {
-                        const pop = el.streakPop;
-                        const conf = pop?.querySelector('.confetti');
-                        if (!pop || !conf) return;
-
-                        el.streakCount.textContent = String(count);
-
-                        conf.innerHTML = '';
-                        const N = 42;
-                        for (let i = 0; i < N; i++) {
-                            const piece = document.createElement('i');
-                            piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
-                            piece.style.setProperty('--t', String(900 + Math.random() * 700));
-                            piece.style.setProperty('--d', String(Math.random() * 350));
-                            const hue = Math.floor(Math.random() * 360);
-                            piece.style.background = `hsl(${hue} 85% 60%)`;
-                            piece.style.boxShadow = `0 0 0 1px hsl(${hue} 85% 45% / .35) inset`;
-                            conf.appendChild(piece);
+                            state.bestStreak = 0;
+                            state.breakdown = {};
+                            el.restart.style.display = 'none';
+                            render();
+                            updateMeta();
                         }
 
-                        pop.hidden = false;
-                        void pop.offsetWidth;       // force reflow
-                        pop.classList.add('show');
-
-                        setTimeout(() => {
-                            pop.classList.remove('show');
-                            setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
-                        }, 1400);
-                    }
-
-                    // DEBUG: expose toast for manual trigger in console (type: __toast(4))
-                    window.__toast = fireStreakToast;
-
-                    function doNext() {
-                        if (!current()) return;
-                        if (state.i >= state.rounds.length - 1) {
-                            finishGame();
-                            return;
+                        function updateMeta() {
+                            el.score.textContent = `Score: ${state.score}`;
+                            el.round.textContent = `Round: ${Math.min(state.i + 1, state.rounds.length)} / ${state.rounds.length}`;
+                            const pct = state.rounds.length ? Math.round((state.i) / state.rounds.length * 100) : 0;
+                            el.progress.style.width = pct + '%';
+                            el.progress.parentElement.setAttribute('aria-valuenow', String(pct));
                         }
-                        state.i++;
-                        render();
-                    }
 
-                    // ---------- Single, final finishGame ----------
-                    function finishGame() {
-                        const total = state.rounds.length || 0;
+                        function current() { return state.rounds[state.i]; }
 
-                        // figure out last category for "Play again" routing on results page
-                        const lastPlayed = state.rounds[state.i] || state.rounds[total - 1] || null;
-                        const urlCat = new URLSearchParams(location.search).get('cat') || '';
-                        const lastCategory = (lastPlayed && lastPlayed.category) ? lastPlayed.category : urlCat;
+                        function render() {
+                            const r = current();
+                            if (!r) {
+                                el.cards.innerHTML = '';
+                                el.status.innerHTML = `<strong>All done!</strong> You scored ${state.score} / ${state.rounds.length}.`;
+                                el.categoryNote.textContent = '';
+                                el.reveal.disabled = true;
+                                el.next.disabled = true;
+                                el.restart.style.display = 'inline-block';
+                                el.progress.style.width = '100%';
+                                return;
+                            }
 
-                        const summary = {
-                            score: state.score,
-                            total,
-                            accuracy: total ? Math.round((state.score / total) * 100) : 0,
-                            bestStreak: state.bestStreak,
-                            breakdown: state.breakdown,
-                            lastCategory,
-                            categories: Object.keys(state.breakdown || {}),
-                            ts: Date.now(),
-                        };
-                        try { sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary)); } catch { }
-                        window.location.href = 'results.html';
-                    }
+                            let order = [0, 1];
+                            if (state.shuffleSides) shuffle(order);
 
-                    // ---------- Events ----------
-                    el.reveal.addEventListener('click', doReveal);
-                    el.next.addEventListener('click', doNext);
-                    el.restart.addEventListener('click', resetGame);
-                })();
+                            el.cards.innerHTML = '';
+                            el.error.textContent = '';
+                            el.status.textContent = `Round ${state.i + 1}`;
+                            el.categoryNote.textContent = `Category: ${r.category}`;
+                            state.picked = null;
+                            el.reveal.disabled = false;
+                            el.next.disabled = true;
+
+                            order.forEach((srcIdx, visIdx) => {
+                                const img = r.images[srcIdx];
+                                const card = document.createElement('button');
+                                card.className = 'card';
+                                card.type = 'button';
+                                card.dataset.visualIndex = String(visIdx);
+                                card.dataset.srcIndex = String(srcIdx);
+                                card.setAttribute('aria-label', `Image ${visIdx === 0 ? 'A' : 'B'} — choose if this is AI-generated`);
+
+                                const label = document.createElement('div');
+                                label.className = 'label';
+                                label.textContent = visIdx === 0 ? 'A' : 'B';
+
+                                const frame = document.createElement('div');
+                                frame.className = 'frame';
+                                const tag = document.createElement('img');
+                                tag.src = img.src;
+                                tag.alt = img.alt;
+                                frame.appendChild(tag);
+
+                                const pick = document.createElement('div');
+                                pick.className = 'pick';
+                                const guess = document.createElement('button');
+                                guess.className = 'btn';
+                                guess.type = 'button';
+                                guess.textContent = 'This is AI';
+                                guess.addEventListener('click', e => { e.stopPropagation(); choose(visIdx); });
+                                pick.appendChild(guess);
+
+                                const overlay = document.createElement('div');
+                                overlay.className = 'reveal';
+                                overlay.innerHTML = `<span class="chip">${img.label.toUpperCase()}</span>`;
+
+                                card.append(label, frame, pick, overlay);
+                                card.addEventListener('click', () => choose(visIdx));
+                                el.cards.appendChild(card);
+                            });
+
+                            window.onkeydown = (e) => {
+                                if (e.key.toLowerCase() === 'a') choose(0);
+                                if (e.key.toLowerCase() === 'b') choose(1);
+                                if (e.key.toLowerCase() === 'r') doReveal();
+                                if (e.key.toLowerCase() === 'n') doNext();
+                            };
+
+                            updateMeta();
+                        }
+
+                        function choose(visIdx) {
+                            if (!current()) return;
+                            el.cards.querySelectorAll('.card').forEach(c => c.style.borderColor = 'var(--ring)');
+                            const card = el.cards.querySelector(`.card[data-visual-index="${visIdx}"]`);
+                            if (!card) return;
+                            state.picked = visIdx;
+                            card.style.borderColor = 'var(--accent)';
+                            el.status.textContent = `Selected ${visIdx === 0 ? 'A' : 'B'}. Click Reveal or press R.`;
+                        }
+
+                        // ---------- Hardened doReveal ----------
+                        function doReveal() {
+                            const r = current();
+                            if (!r) return;
+
+                            // Ensure breakdown object & bucket exist — fully guarded
+                            if (!state.breakdown || typeof state.breakdown !== 'object') state.breakdown = {};
+                            const cat = String(r?.category ?? 'all');
+                            if (!state.breakdown[cat] || typeof state.breakdown[cat] !== 'object') {
+                                state.breakdown[cat] = { correct: 0, total: 0 };
+                            }
+
+                            // Require a selection
+                            if (state.picked === null || state.picked === undefined) {
+                                el.status.textContent = 'Pick A or B first, then click Reveal (or press R).';
+                                return;
+                            }
+
+                            // Determine if picked is the AI image
+                            const selCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
+                            const srcIndex = selCard ? Number(selCard.dataset.srcIndex) : -1;
+                            const pickedIsAI = srcIndex >= 0 ? (r.images[srcIndex]?.label === 'ai') : false;
+
+                            // Reveal overlays and highlight AI chip
+                            el.cards.querySelectorAll('.reveal').forEach(ov => ov.classList.add('show'));
+                            el.cards.querySelectorAll('.card').forEach(card => {
+                                const chip = card.querySelector('.reveal .chip');
+                                if (!chip) return;
+                                const si = Number(card.dataset.srcIndex);
+                                if (r.images[si]?.label === 'ai') chip.classList.add('win');
+                                else chip.classList.remove('win');
+                            });
+
+                            // Score & streak
+                            if (pickedIsAI) {
+                                state.score++;
+                                state.aiStreak++;
+                                el.status.innerHTML = '<strong>Correct!</strong> You picked the AI image.';
+                            } else {
+                                state.aiStreak = 0;
+                                el.status.innerHTML = '<strong>Not quite.</strong> The other image is AI.';
+                            }
+                            el.score.textContent = `Score: ${state.score}`;
+
+                            // Best streak
+                            if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
+
+                            // Per-category breakdown (use a stable local reference)
+                            const b = state.breakdown[cat];
+                            b.total += 1;
+                            if (pickedIsAI) b.correct += 1;
+
+                            // Streak toast
+                            if (state.aiStreak >= 3) fireStreakToast(state.aiStreak);
+
+                            // Enable Next; disable Reveal
+                            el.next.disabled = false;
+                            el.reveal.disabled = true;
+
+                            // ARIA update
+                            if (el.aria) {
+                                el.aria.textContent = pickedIsAI
+                                    ? 'Correct. You chose the AI image.'
+                                    : 'Incorrect. The other image was AI.';
+                            }
+                        }
+
+                        function fireStreakToast(count) {
+                            const pop = el.streakPop;
+                            const conf = pop?.querySelector('.confetti');
+                            if (!pop || !conf) return;
+
+                            el.streakCount.textContent = String(count);
+
+                            conf.innerHTML = '';
+                            const N = 42;
+                            for (let i = 0; i < N; i++) {
+                                const piece = document.createElement('i');
+                                piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
+                                piece.style.setProperty('--t', String(900 + Math.random() * 700));
+                                piece.style.setProperty('--d', String(Math.random() * 350));
+                                const hue = Math.floor(Math.random() * 360);
+                                piece.style.background = `hsl(${hue} 85% 60%)`;
+                                piece.style.boxShadow = `0 0 0 1px hsl(${hue} 85% 45% / .35) inset`;
+                                conf.appendChild(piece);
+                            }
+
+                            pop.hidden = false;
+                            void pop.offsetWidth;       // force reflow
+                            pop.classList.add('show');
+
+                            setTimeout(() => {
+                                pop.classList.remove('show');
+                                setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220);
+                            }, 1400);
+                        }
+
+                        // DEBUG: expose toast for manual trigger in console (type: __toast(4))
+                        window.__toast = fireStreakToast;
+
+                        function doNext() {
+                            if (!current()) return;
+                            if (state.i >= state.rounds.length - 1) {
+                                finishGame();
+                                return;
+                            }
+                            state.i++;
+                            render();
+                        }
+
+                        // ---------- Single, final finishGame ----------
+                        function finishGame() {
+                            const total = state.rounds.length || 0;
+
+                            // figure out last category for "Play again" routing on results page
+                            const lastPlayed = state.rounds[state.i] || state.rounds[total - 1] || null;
+                            const urlCat = new URLSearchParams(location.search).get('cat') || '';
+                            const lastCategory = (lastPlayed && lastPlayed.category) ? lastPlayed.category : urlCat;
+
+                            const summary = {
+                                score: state.score,
+                                total,
+                                accuracy: total ? Math.round((state.score / total) * 100) : 0,
+                                bestStreak: state.bestStreak,
+                                breakdown: state.breakdown,
+                                lastCategory,
+                                categories: Object.keys(state.breakdown || {}),
+                                ts: Date.now(),
+                            };
+                            try { sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary)); } catch { }
+                            window.location.href = 'results.html';
+                        }
+
+                        // ---------- Events ----------
+                        el.reveal.addEventListener('click', doReveal);
+                        el.next.addEventListener('click', doNext);
+                        el.restart.addEventListener('click', resetGame);
+                    })();
             </script>
 
 
