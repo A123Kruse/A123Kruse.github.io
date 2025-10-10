@@ -58,11 +58,6 @@
             <div class="confetti" aria-hidden="true"></div>
         </div>
 
-        <!-- top progress bar -->
-        <div class="top-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Game progress">
-            <span id="topProgress"></span>
-        </div>
-
 
         <!-- Guard: toast + Next mapping + error logger (kept BEFORE main script) -->
         <script>
@@ -167,13 +162,19 @@
                     el.progress.style.width = pct + '%';
                     el.progress.parentElement.setAttribute('aria-valuenow', String(pct));
 
-                    // NEW: top progress bar
+                    // header bar + label
                     if (el.topProgress) {
                         el.topProgress.style.width = pct + '%';
                         if (el.progressLabel) el.progressLabel.textContent = pct + '%';
-                    }
 
+                        const topBar = document.querySelector('.top-progress');
+                        if (topBar) {
+                            topBar.setAttribute('aria-valuenow', String(pct));
+                            topBar.classList.toggle('is-complete', pct === 100);   // <-- fade out at 100%
+                        }
+                    }
                 }
+
 
 
                 /* ---------- Build & load rounds (defensive against manifest shape) ---------- */

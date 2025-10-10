@@ -268,3 +268,23 @@ html[data-theme="dark"] .pick .btn:hover {
         color: rgba(0,0,0,.55);
     }
 }
+
+
+/* Fade the percentage when complete, and give the bar a subtle success tint */
+.top-progress {
+    position: relative;
+}
+
+    .top-progress .progress-label {
+        transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .top-progress.is-complete .progress-label {
+        opacity: 0;
+        transform: translateY(-2px);
+    }
+
+    /* Optional: a gentle green shift at 100% */
+    .top-progress.is-complete > span {
+        background: linear-gradient(90deg, #19c37d, #7ee0b4);
+    }
