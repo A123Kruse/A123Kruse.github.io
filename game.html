@@ -22,6 +22,12 @@
                 <span class="pill" id="roundPill">Round: –</span>
                 <span class="pill" id="catPill" style="display:none"></span>
             </div>
+            <!-- Progress bar under score -->
+            <div class="top-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Game progress">
+                <span id="topProgress"></span>
+                <span class="progress-label" id="progressLabel">0%</span>
+            </div>
+
         </header>
 
         <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -121,6 +127,8 @@
                     catNote: $('#categoryNote'),
                     catPill: $('#catPill'),
                     topProgress: $('#topProgress'),
+                    progressLabel: $('#progressLabel'),
+
                 };
 
                 const state = {
@@ -162,9 +170,9 @@
                     // NEW: top progress bar
                     if (el.topProgress) {
                         el.topProgress.style.width = pct + '%';
-                        const topBar = document.querySelector('.top-progress');
-                        if (topBar) topBar.setAttribute('aria-valuenow', String(pct));
+                        if (el.progressLabel) el.progressLabel.textContent = pct + '%';
                     }
+
                 }
 
 

@@ -225,3 +225,46 @@ html[data-theme="dark"] .pick .btn:hover {
     background-size: 40px 100%;
     animation: topbar-stripes 1.2s linear infinite;
 }
+
+
+/* ---------- Progress bar under score ---------- */
+.top-progress {
+    position: relative;
+    margin-top: 6px;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,.1);
+    flex: 1;
+}
+
+    .top-progress > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent, #6ea8fe), #9bd2ff);
+        transition: width .35s ease;
+        border-radius: inherit;
+    }
+
+.progress-label {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--muted, #aaa);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* Light/dark adjustments */
+@media (prefers-color-scheme: light) {
+    .top-progress {
+        background: rgba(0,0,0,.08);
+    }
+
+    .progress-label {
+        color: rgba(0,0,0,.55);
+    }
+}
