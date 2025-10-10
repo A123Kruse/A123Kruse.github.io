@@ -288,3 +288,86 @@ html[data-theme="dark"] .pick .btn:hover {
     .top-progress.is-complete > span {
         background: linear-gradient(90deg, #19c37d, #7ee0b4);
     }
+
+/* ---------- Buttons: match Categories page look ---------- */
+
+/* Primary action buttons (Reveal / Next / Restart) */
+.btn-main {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px; /* same shape as .link in categories */
+    border: 1px solid var(--ring);
+    background: linear-gradient(180deg,#172031,#121a28); /* same gradient as categories */
+    color: var(--text);
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+    .btn-main:hover:not([disabled]) {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    }
+
+    .btn-main:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
+    }
+
+    .btn-main[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+/* Secondary in-card “This is AI” buttons */
+.pick .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px; /* matches categories .btn */
+    border-radius: 10px; /* matches categories .btn */
+    border: 1px solid var(--ring);
+    background: linear-gradient(180deg,#172031,#121a28);
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+    .pick .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    }
+
+    .pick .btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
+    }
+
+/* Make header nav .link match too (already similar) */
+header .link {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ring);
+    background: linear-gradient(180deg,#172031,#121a28);
+    text-decoration: none;
+    color: var(--text);
+    transition: transform .12s ease;
+}
+
+    header .link:hover {
+        transform: translateY(-1px);
+    }
+
+/* Tighten button area on small screens so they wrap nicely */
+.controls {
+    gap: 10px;
+    flex-wrap: wrap;
+}
