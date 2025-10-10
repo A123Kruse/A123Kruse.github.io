@@ -371,3 +371,45 @@ header .link {
     gap: 10px;
     flex-wrap: wrap;
 }
+
+/* ---------- Ghost / Secondary Buttons ---------- */
+
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ring);
+    background: transparent;
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .15s ease, background-color .15s ease, transform .12s ease, box-shadow .12s ease;
+}
+
+    /* Hover + focus feel like the filled buttons, but lighter */
+    .btn-ghost:hover {
+        background: rgba(255,255,255,.06);
+        transform: translateY(-1px);
+    }
+
+    .btn-ghost:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
+    }
+
+/* Light-mode refinement */
+@media (prefers-color-scheme: light) {
+    .btn-ghost:hover {
+        background: rgba(0,0,0,.06);
+    }
+}
+
+/* Disabled state */
+.btn-ghost[disabled] {
+    opacity: .55;
+    cursor: not-allowed;
+}
