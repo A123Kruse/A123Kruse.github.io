@@ -1,18 +1,48 @@
-/* ---------- Game page responsive image & layout overrides ---------- */
+/* ---------- Game page responsive image & layout overrides (light/dark aware) ---------- */
 
-/* Tunable sizing variables */
+/* Base (dark-leaning defaults) */
 :root {
-    --card-max-w: 620px; /* max width per card on large screens   */
-    --card-min-h: 220px; /* minimum card height                   */
-    --card-max-h: 48vh; /* max card height relative to viewport  */
-    --card-ratio: 4 / 3; /* consistent aspect ratio               */
-
+    --card-max-w: 620px;
+    --card-min-h: 220px;
+    --card-max-h: 48vh;
+    --card-ratio: 4 / 3;
     --card-radius: 14px;
+    --card-bg: #0c141d;
     --card-shadow: 0 4px 18px rgba(0,0,0,.25);
-    --card-shadow-hover: 0 6px 22px rgba(0,0,0,.4);
+    --card-shadow-hover: 0 6px 22px rgba(0,0,0,.40);
+    --frame-bg: #0c141d;
+    --hover-brightness: 1.05;
 }
 
-/* Cards grid layout */
+/* Auto-light theme (users on light mode) */
+@media (prefers-color-scheme: light) {
+    :root {
+        --card-bg: #ffffff;
+        --card-shadow: 0 4px 18px rgba(0,0,0,.14);
+        --card-shadow-hover: 0 8px 30px rgba(0,0,0,.18);
+        --frame-bg: #f3f5f7;
+        --hover-brightness: 1.02;
+    }
+}
+
+/* Optional manual override (e.g., on <html data-theme="light"> or "...='dark'") */
+html[data-theme="light"] {
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 18px rgba(0,0,0,.14);
+    --card-shadow-hover: 0 8px 30px rgba(0,0,0,.18);
+    --frame-bg: #f3f5f7;
+    --hover-brightness: 1.02;
+}
+
+html[data-theme="dark"] {
+    --card-bg: #0c141d;
+    --card-shadow: 0 4px 18px rgba(0,0,0,.25);
+    --card-shadow-hover: 0 6px 22px rgba(0,0,0,.40);
+    --frame-bg: #0c141d;
+    --hover-brightness: 1.05;
+}
+
+/* Grid */
 .cards {
     display: grid;
     gap: 18px;
@@ -27,62 +57,60 @@
     }
 }
 
-/* Prevent giant cards on ultrawide screens */
+/* Card */
 .card {
     position: relative;
     max-width: var(--card-max-w);
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto;
     border-radius: var(--card-radius);
     overflow: hidden;
-    background: var(--card-bg, #0c141d);
+    background: var(--card-bg);
     box-shadow: var(--card-shadow);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+    transition: transform .25s ease, box-shadow .25s ease, filter .25s ease, background-color .25s ease;
 }
 
-    /* Hover & focus effects */
     .card:hover,
     .card:focus-visible {
         transform: translateY(-4px) scale(1.02);
         box-shadow: var(--card-shadow-hover);
-        filter: brightness(1.05);
+        filter: brightness(var(--hover-brightness));
     }
 
-/* Standardized frame box */
+/* Frame (consistent box) */
 .frame {
     position: relative;
     width: 100%;
     height: clamp(var(--card-min-h), var(--card-max-h), 9999px);
     aspect-ratio: var(--card-ratio);
-    background: #0c141d;
+    background: var(--frame-bg);
     overflow: hidden;
     display: grid;
     place-items: center;
+    border-radius: inherit;
 }
 
-    /* Cropped, responsive images */
+    /* Image (cropped & responsive) */
     .frame img {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* crop rather than stretch */
+        object-fit: cover;
         object-position: center;
         display: block;
-        transition: transform 0.4s ease;
+        transition: transform .4s ease;
     }
 
-/* Subtle zoom on hover */
 .card:hover .frame img {
     transform: scale(1.05);
 }
 
-/* Slightly taller on very small phones */
+/* Tiny phones: allow a bit more height */
 @media (max-width: 380px) {
     :root {
         --card-max-h: 56vh;
     }
 }
 
-/* Keep overlays visible & interactive */
+/* Overlays */
 .label, .pick, .reveal {
     pointer-events: none;
 }
@@ -91,19 +119,33 @@
         pointer-events: auto;
     }
 
-    /* Optional: make buttons slightly lift on hover */
+    /* Button micro-interactions */
     .pick .btn {
-        transition: transform 0.2s ease, background 0.2s ease;
+        transition: transform .2s ease, background .2s ease;
     }
 
         .pick .btn:hover {
             transform: translateY(-2px);
-            background: rgba(255,255,255,0.15);
+            background: rgba(0,0,0,.08);
         }
 
-    /* Optional soft fade for reveals */
-    .reveal.show .chip {
-        transition: opacity 0.4s ease, transform 0.3s ease;
-        transform: translateY(0);
-        opacity: 1;
+@media (prefers-color-scheme: dark) {
+    .pick .btn:hover {
+        background: rgba(255,255,255,.12);
     }
+}
+
+html[data-theme="light"] .pick .btn:hover {
+    background: rgba(0,0,0,.08);
+}
+
+html[data-theme="dark"] .pick .btn:hover {
+    background: rgba(255,255,255,.12);
+}
+
+/* Reveal polish */
+.reveal.show .chip {
+    transition: opacity .4s ease, transform .3s ease;
+    transform: translateY(0);
+    opacity: 1;
+}
