@@ -187,3 +187,41 @@ html[data-theme="dark"] .pick .btn:hover {
         box-shadow: 0 0 22px rgba(255,92,92,.9);
     }
 }
+
+
+/* ---------- Thin, fixed progress bar at very top ---------- */
+.top-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255,255,255,.06); /* subtle track */
+    border-bottom: 1px solid var(--ring);
+    z-index: 9999; /* above header/toast */
+}
+
+    .top-progress > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent, #6ea8fe), #9bd2ff);
+        transition: width .35s ease;
+    }
+
+/* Optional: subtle shimmer while loading first round */
+@keyframes topbar-stripes {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 40px 0;
+    }
+}
+
+.top-progress.loading > span {
+    background-image: repeating-linear-gradient( 45deg, rgba(255,255,255,.25) 0 10px, rgba(255,255,255,0) 10px 20px );
+    background-size: 40px 100%;
+    animation: topbar-stripes 1.2s linear infinite;
+}

@@ -52,6 +52,12 @@
             <div class="confetti" aria-hidden="true"></div>
         </div>
 
+        <!-- top progress bar -->
+        <div class="top-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Game progress">
+            <span id="topProgress"></span>
+        </div>
+
+
         <!-- Guard: toast + Next mapping + error logger (kept BEFORE main script) -->
         <script>
             console.log('[guard] v3');
@@ -114,6 +120,7 @@
                     streakCount: $('#streakCount'),
                     catNote: $('#categoryNote'),
                     catPill: $('#catPill'),
+                    topProgress: $('#topProgress'),
                 };
 
                 const state = {
@@ -145,10 +152,21 @@
                 function updateMeta() {
                     el.score.textContent = `Score: ${state.score}`;
                     el.round.textContent = `Round: ${Math.min(state.i + 1, state.rounds.length)} / ${state.rounds.length || '–'}`;
+
                     const pct = state.rounds.length ? Math.round((state.i) / state.rounds.length * 100) : 0;
+
+                    // existing in-page bar
                     el.progress.style.width = pct + '%';
                     el.progress.parentElement.setAttribute('aria-valuenow', String(pct));
+
+                    // NEW: top progress bar
+                    if (el.topProgress) {
+                        el.topProgress.style.width = pct + '%';
+                        const topBar = document.querySelector('.top-progress');
+                        if (topBar) topBar.setAttribute('aria-valuenow', String(pct));
+                    }
                 }
+
 
                 /* ---------- Build & load rounds (defensive against manifest shape) ---------- */
                 async function start() {
@@ -237,11 +255,11 @@
                         card.dataset.srcIndex = String(srcIdx);
 
                         card.innerHTML = `
-                      <div class="label">${visIdx === 0 ? 'A' : 'B'}</div>
-                      <div class="frame"><img src="${img.src}" alt="${img.alt || ''}"></div>
-                      <div class="pick"><button type="button" class="btn">This is AI</button></div>
-                      <div class="reveal"><span class="chip">${img.label.toUpperCase()}</span></div>
-                    `;
+                              <div class="label">${visIdx === 0 ? 'A' : 'B'}</div>
+                              <div class="frame"><img src="${img.src}" alt="${img.alt || ''}"></div>
+                              <div class="pick"><button type="button" class="btn">This is AI</button></div>
+                              <div class="reveal"><span class="chip">${img.label.toUpperCase()}</span></div>
+                            `;
 
                         card.addEventListener('click', () => choose(visIdx));
                         card.querySelector('.btn')?.addEventListener('click', (e) => { e.stopPropagation(); choose(visIdx); });
