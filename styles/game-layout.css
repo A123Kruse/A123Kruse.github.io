@@ -149,3 +149,41 @@ html[data-theme="dark"] .pick .btn:hover {
     transform: translateY(0);
     opacity: 1;
 }
+
+
+/* ---------- Correct / Incorrect outline feedback ---------- */
+
+/* When an image is revealed and is the correct AI pick */
+.card.correct .frame {
+    border: 3px solid rgba(25,195,125,0.8); /* bright green border */
+    box-shadow: 0 0 14px rgba(25,195,125,0.55);
+    animation: correct-glow 1.4s ease-in-out;
+}
+
+/* When an image is revealed but was the wrong pick */
+.card.incorrect .frame {
+    border: 3px solid rgba(255,92,92,0.8); /* soft red border */
+    box-shadow: 0 0 14px rgba(255,92,92,0.55);
+    animation: incorrect-glow 1.4s ease-in-out;
+}
+
+/* Gentle pulse keyframes */
+@keyframes correct-glow {
+    0%,100% {
+        box-shadow: 0 0 10px rgba(25,195,125,.6);
+    }
+
+    50% {
+        box-shadow: 0 0 22px rgba(25,195,125,.9);
+    }
+}
+
+@keyframes incorrect-glow {
+    0%,100% {
+        box-shadow: 0 0 10px rgba(255,92,92,.6);
+    }
+
+    50% {
+        box-shadow: 0 0 22px rgba(255,92,92,.9);
+    }
+}

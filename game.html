@@ -293,6 +293,17 @@
                     else { state.aiStreak = 0; el.status.innerHTML = '<strong>Not quite.</strong> The other image is AI.'; }
                     el.score.textContent = `Score: ${state.score}`;
 
+                    // Add green/red outlines for visual feedback
+                    el.cards.querySelectorAll('.card').forEach(card => card.classList.remove('correct', 'incorrect'));
+
+                    const pickedCard = el.cards.querySelector(`.card[data-visual-index="${state.picked}"]`);
+                    if (pickedCard) pickedCard.classList.add(pickedIsAI ? 'correct' : 'incorrect');
+
+                    // Also highlight the actual AI card (helpful feedback)
+                    const aiCard = el.cards.querySelector('.card .chip.win')?.closest('.card');
+                    if (aiCard && pickedCard !== aiCard) aiCard.classList.add('correct');
+
+
                     // breakdown bookkeeping (safe)
                     const cat = String(r.category || 'all');
                     if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
