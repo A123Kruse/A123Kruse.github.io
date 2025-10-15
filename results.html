@@ -1,76 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- shared base styles -->
+  <link rel="stylesheet" href="styles/site.css">
 
-    <!-- Load shared site-wide styles (fonts, tokens, base colors) -->
-    <link rel="stylesheet" href="styles/site.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI or Real? – Results</title>
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI or Real? – Results</title>
-    <link rel="stylesheet" href="results.css">
+  <!-- results page styles (includes hamburger menu) -->
+  <link rel="stylesheet" href="results.css">
 </head>
 <body>
-  <main class="wrap">
-    <header class="bar">
-      <a class="btn" href="index.html">← Home</a>
-      <h1>Results</h1>
-      <a class="btn" href="game.html">Play Again</a>
-    </header>
+    <main class="wrap">
+        <header class="bar">
+            <a class="btn" href="index.html">← Home</a>
+            <h1>Results</h1>
 
-    <section id="summary" class="cards"></section>
+            <!-- Right-side controls -->
+            <div class="header-actions">
+                <!-- Play again (href set by script) -->
+                <a id="playAgain" class="btn primary">Play Again</a>
 
-    <section id="breakdown" class="card">
-      <h2>Category Breakdown</h2>
-      <div id="tableWrap"></div>
-    </section>
-  </main>
 
-  <script>
-  (function () {
-    const s = sessionStorage.getItem('ai-or-real:summary');
-    const summaryEl = document.getElementById('summary');
-    const tableWrap = document.getElementById('tableWrap');
+                <!-- Hamburger -->
+                <button id="menuBtn" class="hamburger" aria-label="Open category menu" aria-expanded="false" aria-controls="menuPanel">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
 
-    if (!s) {
-      summaryEl.innerHTML = `
-        <div class="card">
-          <p>No results found. <a href="game.html">Play a round</a> to see your stats.</p>
-        </div>`;
-      return;
-    }
+            <!-- Slide-over category panel -->
+            <aside id="menuPanel" class="menu-panel" hidden>
+                <div class="menu-head">
+                    <strong>Choose a category</strong>
+                    <button id="closeMenu" class="icon-btn" aria-label="Close">✕</button>
+                </div>
+                <nav id="menuList" class="menu-list" role="menu" aria-label="Categories"></nav>
+            </aside>
+            <div id="menuBackdrop" class="menu-backdrop" hidden></div>
+        </header>
 
-    const data = JSON.parse(s);
-    const { score, total, accuracy, bestStreak, breakdown } = data;
+        <section id="summary" class="cards"></section>
 
-    summaryEl.innerHTML = `
-      <div class="card kpis">
-        <div><div class="k">Score</div><div class="v">${score}/${total}</div></div>
-        <div><div class="k">Accuracy</div><div class="v">${accuracy}%</div></div>
-        <div><div class="k">Best AI Streak</div><div class="v">${bestStreak}×</div></div>
-      </div>
-    `;
+        <section id="breakdown" class="card">
+            <h2>Category Breakdown</h2>
+            <div id="tableWrap"></div>
+        </section>
+    </main>
 
-    // Build table
-    const rows = Object.entries(breakdown || {}).map(([cat, v]) => {
-      const pct = v.total ? Math.round((v.correct / v.total) * 100) : 0;
-      return `<tr>
-        <td>${cat}</td>
-        <td>${v.correct}/${v.total}</td>
-        <td>${pct}%</td>
-      </tr>`;
-    }).join('') || `<tr><td colspan="3">No category data.</td></tr>`;
+    <script>
+        (() => {
+            // Safe element getters (return null if missing)
+            const $ = (sel) => document.querySelector(sel);
 
-    tableWrap.innerHTML = `
-      <table class="stats">
-        <thead><tr><th>Category</th><th>Correct</th><th>Accuracy</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <div class="actions">
-        <a class="btn primary" href="game.html">Play Again</a>
-      </div>
-    `;
-  })();
-  </script>
+            const summaryEl = $('#summary');
+            const tableWrap = $('#tableWrap');
+            const playAgain = $('#playAgain');
+
+            // Optional hamburger bits (may not exist — that's OK)
+            const menuBtn = $('#menuBtn');
+            const menuPanel = $('#menuPanel');
+            const menuList = $('#menuList');        // <nav id="menuList" class="menu-list">
+            const closeMenu = $('#closeMenu');
+            const backdrop = $('#menuBackdrop');
+
+            // Helper to build game link with ?cat=
+            const gameHref = (cat) => {
+                const p = new URLSearchParams();
+                if (cat) p.set('cat', cat);
+                return 'game.html' + (p.toString() ? '?' + p.toString() : '');
+            };
+
+            // Read summary (or bail gently)
+            const raw = sessionStorage.getItem('ai-or-real:summary');
+            if (!raw) {
+                if (summaryEl) summaryEl.innerHTML = `
+          <div class="card"><p>No results found. <a href="game.html">Play a round</a>.</p></div>`;
+                if (playAgain) playAgain.href = 'game.html';
+                return;
+            }
+
+            const data = JSON.parse(raw);
+            const {
+                score = 0,
+                total = 0,
+                accuracy = 0,
+                bestStreak = 0,
+                breakdown = {},
+                lastCategory = '',
+                categories = []
+            } = data;
+
+            // Decide which category to use for Play Again
+            let defaultCat = lastCategory
+                || (categories[0] || '')
+                || (Object.keys(breakdown)[0] || '');
+
+            // Render KPIs
+            if (summaryEl) {
+                summaryEl.innerHTML = `
+          <div class="card kpis">
+            <div><div class="k">Score</div><div class="v">${score}/${total}</div></div>
+            <div><div class="k">Accuracy</div><div class="v">${accuracy}%</div></div>
+            <div><div class="k">Best AI Streak</div><div class="v">${bestStreak || 0}×</div></div>
+          </div>`;
+            }
+
+            // Render breakdown table
+            if (tableWrap) {
+                const rows = Object.entries(breakdown).map(([cat, v]) => {
+                    const pct = v.total ? Math.round((v.correct / v.total) * 100) : 0;
+                    return `<tr><td>${cat}</td><td>${v.correct}/${v.total}</td><td>${pct}%</td></tr>`;
+                }).join('') || `<tr><td colspan="3">No category data.</td></tr>`;
+
+                tableWrap.innerHTML = `
+            <table class="stats">
+                <thead><tr><th>Category</th><th>Correct</th><th>Accuracy</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="actions">
+                <a class="btn primary" id="playAgain2">Play Again</a>
+                <a class="btn ghost" href="categories.html">View Categories</a>
+            </div>
+
+            }
+
+            // Wire Play Again buttons
+            const pa2 = $('#playAgain2');
+            if (playAgain) playAgain.href = gameHref(defaultCat);
+            if (pa2) pa2.href = playAgain ? playAgain.href : gameHref(defaultCat);
+
+            // ---- Categories menu/list (works whether hamburger exists or not) ----
+            async function renderCategories() {
+                // Try manifest for full list; fall back to what we have in summary
+                let cats = [];
+                try {
+                    const res = await fetch('images/manifest.json', { cache: 'no-store' });
+                    if (res.ok) cats = Object.keys(await res.json()).sort((a, b) => a.localeCompare(b));
+                } catch { /* ignore */ }
+                if (!cats.length) cats = (categories.length ? categories : Object.keys(breakdown)).sort();
+
+                // If defaultCat is still empty, pick first available
+                if (!defaultCat && cats.length) {
+                    defaultCat = cats[0];
+                    if (playAgain) playAgain.href = gameHref(defaultCat);
+                    if (pa2) pa2.href = gameHref(defaultCat);
+                }
+
+                // If hamburger exists, populate it
+                if (menuList) {
+                    menuList.innerHTML = cats.length
+                        ? cats.map(cat => `<a role="menuitem" class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
+                        : `<div class="muted">No categories available.</div>`;
+                    return;
+                }
+
+                // Otherwise, inject a simple vertical list under the header
+                const host = document.createElement('section');
+                host.className = 'card';
+                host.innerHTML = `
+          <h2>Categories</h2>
+          <nav class="menu-list">
+            ${cats.length
+                        ? cats.map(cat => `<a class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
+                        : `<div class="muted">No categories available.</div>`}
+          </nav>
+        `;
+                // Place after the KPI card
+                if (summaryEl) summaryEl.insertAdjacentElement('afterend', host);
+            }
+            renderCategories();
+
+            // Optional hamburger behaviors — only if those elements exist
+            if (menuBtn && menuPanel && backdrop) {
+                const openMenu = () => {
+                    menuPanel.hidden = false;
+                    backdrop.hidden = false;
+                    document.body.style.overflow = 'hidden';
+                    menuBtn.setAttribute('aria-expanded', 'true');
+                    requestAnimationFrame(() => menuPanel.classList.add('show'));
+                };
+                const closeMenuPanel = () => {
+                    menuPanel.classList.remove('show');
+                    menuBtn.setAttribute('aria-expanded', 'false');
+                    setTimeout(() => {
+                        menuPanel.hidden = true;
+                        backdrop.hidden = true;
+                        document.body.style.overflow = '';
+                    }, 150);
+                };
+                menuBtn.addEventListener('click', openMenu);
+                if (closeMenu) closeMenu.addEventListener('click', closeMenuPanel);
+                backdrop.addEventListener('click', closeMenuPanel);
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !menuPanel.hidden) closeMenuPanel();
+                });
+            }
+        })();
+    </script>
+
+
 </body>
 </html>

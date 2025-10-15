@@ -203,3 +203,64 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
 /* one-per-line menu links */
 .menu-list { list-style: none; padding: 0; margin: 0; }
 .menu-list .menu-link { display: block; margin: 6px 0; }
+
+/* ---------- Results buttons: match Game/Categories look ---------- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ring);
+    background: linear-gradient(180deg,#172031,#121a28);
+    color: var(--text);
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    }
+
+    .btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
+    }
+
+    .btn[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    /* Primary emphasis (same fill as base .btn, just a hook if you ever need variants) */
+    .btn.primary {
+    }
+
+    /* Ghost / outline variant */
+    .btn.ghost {
+        background: transparent;
+    }
+
+        .btn.ghost:hover {
+            background: rgba(255,255,255,.06);
+        }
+
+@media (prefers-color-scheme: light) {
+    .btn.ghost:hover {
+        background: rgba(0,0,0,.06);
+    }
+}
+
+/* Actions row spacing on Results */
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
