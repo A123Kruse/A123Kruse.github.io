@@ -17,46 +17,32 @@
             <a class="btn" href="index.html">← Home</a>
             <h1>Results</h1>
 
-            <button id="menuBtn" aria-haspopup="menu" aria-expanded="false">☰ Categories</button>
-
             <!-- Right-side controls -->
             <div class="header-actions">
-                <!-- Play again (href set by script) -->
                 <a id="playAgain" class="btn primary">Play Again</a>
 
-
-                <!-- Hamburger -->
-                <button id="menuBtn" class="hamburger" aria-label="Open category menu" aria-expanded="false" aria-controls="menuPanel">
+                <!-- Single hamburger trigger -->
+                <button id="menuBtn" class="hamburger" aria-label="Open category menu" aria-controls="menuPanel" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
             </div>
 
+            <!-- Single slide-over panel -->
             <aside id="menuPanel" hidden>
                 <div class="sheet-head">
                     <div class="sheet-title">Categories</div>
                     <button id="closeMenu" aria-label="Close">✕</button>
                 </div>
-
                 <div class="sheet-body">
-                    <nav id="menuList" class="menu-list" role="menu">
-                        <!-- links get injected by your script -->
-                    </nav>
+                    <nav id="menuList" class="menu-list" role="menu"></nav>
                 </div>
-
                 <div class="sheet-foot">Tip: you can switch categories anytime.</div>
             </aside>
 
-            <!-- Slide-over category panel -->
-            <aside id="menuPanel" class="menu-panel" hidden>
-                <div class="menu-head">
-                    <strong>Choose a category</strong>
-                    <button id="closeMenu" class="icon-btn" aria-label="Close">✕</button>
-                </div>
-                <nav id="menuList" class="menu-list" role="menu" aria-label="Categories"></nav>
-            </aside>
-            <div id="menuBackdrop" class="menu-backdrop" hidden></div>
+            <!-- Single backdrop -->
             <div id="menuBackdrop" hidden></div>
         </header>
+
 
         <section id="summary" class="cards"></section>
 

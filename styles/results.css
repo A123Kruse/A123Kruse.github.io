@@ -71,52 +71,7 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
     }
 
 /* Slide-over menu */
-.menu-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    backdrop-filter: blur(1px);
-    z-index: 1000;
-}
 
-.menu-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    width: min(86vw, 320px);
-    background: linear-gradient(180deg,#111a2a,#0e1726);
-    border-left: 1px solid var(--ring);
-    transform: translateX(100%);
-    transition: transform .15s ease-out;
-    z-index: 1001;
-    padding: 14px;
-    box-shadow: -20px 0 40px rgba(0,0,0,.35);
-}
-
-/* one-per-line menu links */
-.menu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-    .menu-list .menu-link {
-        display: block;
-        margin: 6px 0;
-    }
-
-
-    .menu-panel.show {
-        transform: translateX(0);
-    }
-
-.menu-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
 
 .menu-list {
     display: grid;
