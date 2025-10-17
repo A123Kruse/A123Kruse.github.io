@@ -383,3 +383,66 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         background: linear-gradient(180deg,#f4f6fa,#e9edf4);
     }
 }
+
+
+/* --- Category pills in the drawer (on brand) --- */
+.menu-list {
+    display: grid;
+    gap: 8px;
+    padding: 8px;
+}
+
+/* pill look, same gradient/border/hover as site buttons */
+.menu-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 999px; /* pill */
+    border: 1px solid var(--ring);
+    background: linear-gradient(180deg,#172031,#121a28);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: .2px;
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+    /* label & chevron */
+    .menu-link::after {
+        content: "›";
+        opacity: .6;
+        font-weight: 900;
+        transform: translateX(0);
+        transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .menu-link:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    }
+
+        .menu-link:hover::after {
+            transform: translateX(2px);
+            opacity: .9;
+        }
+
+    .menu-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
+    }
+
+    /* active category highlight */
+    .menu-link[aria-current="page"] {
+        border-color: #19c37d;
+        box-shadow: 0 0 0 1px rgba(25,195,125,.35) inset, 0 0 10px rgba(25,195,125,.25);
+    }
+
+/* light mode tweaks */
+@media (prefers-color-scheme: light) {
+    .menu-link {
+        background: linear-gradient(180deg,#f4f6fa,#e9edf4);
+    }
+}

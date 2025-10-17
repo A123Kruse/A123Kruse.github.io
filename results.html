@@ -149,6 +149,13 @@
           </nav>`;
                 if (summaryEl) summaryEl.insertAdjacentElement('afterend', host);
             }
+
+            // highlight the active category
+            const activeHref = gameHref(defaultCat);
+            menuList.querySelectorAll('.menu-link').forEach(a => {
+                if (a.getAttribute('href') === activeHref) a.setAttribute('aria-current', 'page');
+            });
+
             renderCategories();
 
             // Hamburger open/close
