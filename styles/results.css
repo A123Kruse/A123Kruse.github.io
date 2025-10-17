@@ -346,3 +346,50 @@ html, body {
             background: linear-gradient(180deg,#f4f6fa,#e9edf4);
         }
 }
+
+/* Drawer category buttons */
+#menuPanel .menu-list {
+    display: grid;
+    gap: 10px;
+    padding: 8px;
+}
+
+#menuPanel .menu-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 999px; /* pill shape */
+    border: 1px solid var(--ring);
+    background: linear-gradient(180deg,#172031,#121a28); /* same as site buttons */
+    color: var(--text);
+    text-decoration: none !important;
+    font-weight: 800;
+    letter-spacing: .2px;
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+
+    #menuPanel .menu-link:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    }
+
+    #menuPanel .menu-link::after {
+        content: "›";
+        opacity: .6;
+        font-weight: 900;
+        transition: transform .12s ease, opacity .12s ease;
+    }
+
+    #menuPanel .menu-link:hover::after {
+        transform: translateX(2px);
+        opacity: .9;
+    }
+
+    /* highlight current category */
+    #menuPanel .menu-link[aria-current="page"] {
+        border-color: #19c37d;
+        box-shadow: 0 0 0 1px rgba(25,195,125,.35) inset, 0 0 10px rgba(25,195,125,.25);
+    }
