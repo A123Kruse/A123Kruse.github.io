@@ -1,0 +1,125 @@
+/* ===== HAMBURGER / DRAWER (shared) ===== */
+
+/* Backdrop behind the drawer */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 80;
+}
+
+/* The slide-over panel wrapper */
+#menuPanel {
+  position: fixed;
+  inset: 0 0 0 auto;           /* sticks to the right */
+  width: min(420px, 92vw);
+  transform: translateX(102%);
+  transition: transform .22s ease;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+/* Panel chrome */
+#menuPanel .menu-surface {
+  height: 100%;
+  background: linear-gradient(180deg,#0f1522,#0b111b);
+  border-left: 1px solid var(--ring, #2a3a55);
+  box-shadow: -12px 0 30px rgba(0,0,0,.35);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Header row (title + close) */
+#menuPanel .menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* Close button (the little X) */
+#menuPanel .menu-close {
+  appearance: none;
+  border: 1px solid var(--ring, #2a3a55);
+  background: linear-gradient(180deg,#172031,#121a28);
+  color: var(--text, #e7eefc);
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+#menuPanel .menu-close:hover { filter: brightness(1.06); }
+
+/* Scrollable list area */
+#menuPanel .menu-body {
+  overflow: auto;
+  padding: 12px 14px 18px;
+}
+
+/* Grid list */
+#menuPanel .menu-list {
+  display: grid;
+  gap: 10px;
+}
+
+/* Button-style links (matches your “Categories Explained” vibe) */
+#menuPanel .menu-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 999px; /* pill */
+  border: 1px solid var(--ring, #2a3a55);
+  background: linear-gradient(180deg,#172031,#121a28);
+  color: var(--text, #e7eefc);
+  text-decoration: none !important;
+  font-weight: 800;
+  letter-spacing: .2px;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+#menuPanel .menu-link:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 3px 10px rgba(0,0,0,.18);
+}
+#menuPanel .menu-link::after {
+  content: "›";
+  opacity: .6;
+  font-weight: 900;
+  transition: transform .12s ease, opacity .12s ease;
+}
+#menuPanel .menu-link:hover::after {
+  transform: translateX(2px);
+  opacity: .9;
+}
+
+/* Current/active category highlight */
+#menuPanel .menu-link[aria-current="page"] {
+  border-color: #19c37d;
+  box-shadow: 0 0 0 1px rgba(25,195,125,.35) inset, 0 0 10px rgba(25,195,125,.25);
+}
+
+/* When drawer is open: add .menu-open to <body> (or a root wrapper) */
+.menu-open .menu-overlay { opacity: 1; pointer-events: auto; }
+.menu-open #menuPanel { transform: translateX(0%); }
+
+/* Optional: hamburger trigger style if you use a simple button */
+.hamburger-btn {
+  appearance: none;
+  border: 1px solid var(--ring, #2a3a55);
+  background: linear-gradient(180deg,#172031,#121a28);
+  color: var(--text, #e7eefc);
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.hamburger-btn:hover { filter: brightness(1.06); }
