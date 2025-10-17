@@ -116,8 +116,10 @@
             if (playAgain) playAgain.href = gameHref(defaultCat);
             if (pa2) pa2.href = playAgain ? playAgain.href : gameHref(defaultCat);
 
-            // Build categories list (hamburger)
+            // --- ONLY drawer rendering (no fallback section) ---
             async function renderCategories() {
+                if (!menuList) return;
+
                 let cats = [];
                 try {
                     const res = await fetch('images/manifest.json', { cache: 'no-store' });
@@ -131,40 +133,20 @@
                     if (pa2) pa2.href = gameHref(defaultCat);
                 }
 
-                if (menuList) {
-                    menuList.innerHTML = cats.length
-                        ? cats.map(cat => `<a role="menuitem" class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
-                        : `<div class="muted">No categories available.</div>`;
-                    // highlight the active category (after links exist)
-                    const activeHref = gameHref(defaultCat);
-                    menuList.querySelectorAll('.menu-link').forEach(a => {
-                        if (a.getAttribute('href') === activeHref) a.setAttribute('aria-current', 'page');
-                    });
+                menuList.innerHTML = cats.length
+                    ? cats.map(cat => `<a role="menuitem" class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
+                    : `<div class="muted">No categories available.</div>`;
 
-                    return;
-                }
-
-                const host = document.createElement('section');
-                host.className = 'card';
-                host.innerHTML = `
-          <h2>Categories</h2>
-          <nav class="menu-list">
-            ${cats.length
-                        ? cats.map(cat => `<a class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
-                        : `<div class="muted">No categories available.</div>`}
-          </nav>`;
-                if (summaryEl) summaryEl.insertAdjacentElement('afterend', host);
+                // highlight the active category (after links exist)
+                const activeHref = gameHref(defaultCat);
+                menuList.querySelectorAll('.menu-link').forEach(a => {
+                    if (a.getAttribute('href') === activeHref) a.setAttribute('aria-current', 'page');
+                });
             }
-
-            // highlight the active category
-            const activeHref = gameHref(defaultCat);
-            menuList.querySelectorAll('.menu-link').forEach(a => {
-                if (a.getAttribute('href') === activeHref) a.setAttribute('aria-current', 'page');
-            });
 
             renderCategories();
 
-            // Hamburger open/close
+            // hamburger open/close (unchanged)
             if (menuBtn && menuPanel && backdrop) {
                 const openMenu = () => {
                     menuPanel.hidden = false;
@@ -183,7 +165,7 @@
                     }, 150);
                 };
                 menuBtn.addEventListener('click', openMenu);
-                if (closeMenu) closeMenu.addEventListener('click', closeMenuPanel);
+                $('#closeMenu')?.addEventListener('click', closeMenuPanel);
                 backdrop.addEventListener('click', closeMenuPanel);
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && !menuPanel.hidden) closeMenuPanel();
@@ -191,6 +173,7 @@
             }
         })();
     </script>
+
 
 
 

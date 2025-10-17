@@ -1,117 +1,121 @@
 :root {
-  --bg: #0c1523;
-  --panel: #111a2a;
-  --ring: #2a3a55;
-  --text: #e9f0ff;
-  --muted: #9bb0d0;
+    --bg: #0c1523;
+    --panel: #111a2a;
+    --ring: #2a3a55;
+    --text: #e9f0ff;
+    --muted: #9bb0d0;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px at 50% -200px, #122033 0%, #0c1523 60%, #08111c 100%); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-
-.wrap { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
-.bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
-.bar h1 { text-align: center; margin: 0; font-weight: 800; letter-spacing: .4px; }
-
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border-radius: 999px; border: 1px solid var(--ring);
-  background: linear-gradient(180deg,#172031,#121a28); color: var(--text); text-decoration: none;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25); font-weight: 700;
+/* Base */
+* {
+    box-sizing: border-box;
 }
 
-.btn.primary { background: linear-gradient(180deg,#1a2740,#152037); }
-
-.cards { display: grid; gap: 16px; margin-top: 20px; }
-.card {
-  border: 1px solid var(--ring); border-radius: 16px; background: var(--panel);
-  padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+html, body {
+    margin: 0;
+    height: 100%;
+    background: radial-gradient(1200px 1200px at 50% -200px,#122033 0%,#0c1523 60%,#08111c 100%);
+    color: var(--text);
+    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Apple Color Emoji","Segoe UI Emoji";
 }
 
-.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; }
-.kpis .k { color: var(--muted); font-size: 12px; letter-spacing: .5px; text-transform: uppercase; }
-.kpis .v { font-size: 28px; font-weight: 900; }
+.wrap {
+    max-width: 1000px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
 
-.stats { width: 100%; border-collapse: collapse; margin-top: 6px; }
-.stats th, .stats td { border-bottom: 1px solid #1e2a42; padding: 10px 8px; }
-.stats th { color: var(--muted); font-weight: 700; text-align: left; }
-.stats tr:last-child td { border-bottom: none; }
+/* Header */
+.bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+}
 
-.actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+    .bar h1 {
+        margin: 0;
+        text-align: center;
+        font-weight: 800;
+        letter-spacing: .4px;
+    }
 
-
-/* Layout touches */
 .header-actions {
     display: inline-flex;
     gap: 8px;
     align-items: center;
 }
 
-/* Hamburger button */
-.hamburger {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+/* Buttons (match Game/Categories) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
     border: 1px solid var(--ring);
     background: linear-gradient(180deg,#172031,#121a28);
-    display: inline-flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 800;
     cursor: pointer;
+    transition: transform .12s ease,filter .12s ease,box-shadow .12s ease;
     box-shadow: 0 10px 30px rgba(0,0,0,.25);
 }
 
-    .hamburger span {
-        width: 18px;
-        height: 2px;
-        background: var(--text);
-        display: block;
+    .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 3px 10px rgba(0,0,0,.18);
     }
 
-/* Slide-over menu */
+    .btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
+    }
 
+    .btn[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+    }
 
-.menu-list {
+    .btn.primary {
+        background: linear-gradient(180deg,#1a2740,#152037);
+    }
+
+    .btn.ghost {
+        background: transparent;
+    }
+
+        .btn.ghost:hover {
+            background: rgba(255,255,255,.06);
+        }
+
+@media (prefers-color-scheme:light) {
+    .btn.ghost:hover {
+        background: rgba(0,0,0,.06);
+    }
+}
+
+/* Cards / KPIs / Table */
+.cards {
     display: grid;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 16px;
+    margin-top: 20px;
 }
 
-.menu-link {
-    display: block;
-    padding: 10px 12px;
-    border-radius: 10px;
-    text-decoration: none;
+.card {
     border: 1px solid var(--ring);
-    color: var(--text);
-    background: linear-gradient(180deg,#172031,#121a28);
-    font-weight: 700;
-}
-
-    .menu-link:hover {
-        filter: brightness(1.1);
-    }
-
-.icon-btn {
-    appearance: none;
-    border: 1px solid var(--ring);
-    background: transparent;
-    color: var(--text);
-    border-radius: 10px;
-    padding: 6px 10px;
-    cursor: pointer;
-}
-
-.muted {
-    color: var(--muted);
-    padding: 10px 0;
+    border-radius: 16px;
+    background: var(--panel);
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
 }
 
 .kpis {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3,1fr);
     gap: 12px;
     text-align: center;
 }
@@ -151,94 +155,42 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
 
 .actions {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 14px;
-}
-
-/* one-per-line menu links */
-.menu-list { list-style: none; padding: 0; margin: 0; }
-.menu-list .menu-link { display: block; margin: 6px 0; }
-
-/* ---------- Results buttons: match Game/Categories look ---------- */
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--ring);
-    background: linear-gradient(180deg,#172031,#121a28);
-    color: var(--text);
-    font-weight: 800;
-    text-decoration: none;
-    cursor: pointer;
-    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
-}
-
-    .btn:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.04);
-        box-shadow: 0 3px 10px rgba(0,0,0,.18);
-    }
-
-    .btn:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
-    }
-
-    .btn[disabled] {
-        opacity: .55;
-        cursor: not-allowed;
-    }
-
-    /* Primary emphasis (same fill as base .btn, just a hook if you ever need variants) */
-    .btn.primary {
-    }
-
-    /* Ghost / outline variant */
-    .btn.ghost {
-        background: transparent;
-    }
-
-        .btn.ghost:hover {
-            background: rgba(255,255,255,.06);
-        }
-
-@media (prefers-color-scheme: light) {
-    .btn.ghost:hover {
-        background: rgba(0,0,0,.06);
-    }
-}
-
-/* Actions row spacing on Results */
-.actions {
-    display: flex;
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 12px;
+    justify-content: flex-end;
 }
 
+.muted {
+    color: var(--muted);
+    padding: 10px 0;
+}
 
-/* ---------- Pretty hamburger / slide-over menu ---------- */
-
-/* The trigger in the header */
-#menuBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    border-radius: 12px;
+/* Hamburger trigger */
+.hamburger, #menuBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     border: 1px solid var(--ring);
     background: linear-gradient(180deg,#172031,#121a28);
-    color: var(--text);
-    font-weight: 800;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
     cursor: pointer;
-    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    transition: transform .12s ease,filter .12s ease,box-shadow .12s ease;
 }
 
-    #menuBtn:hover {
+    .hamburger span, #menuBtn span {
+        width: 18px;
+        height: 2px;
+        background: var(--text);
+        display: block;
+    }
+
+    .hamburger:hover, #menuBtn:hover {
         transform: translateY(-1px);
         filter: brightness(1.04);
         box-shadow: 0 3px 10px rgba(0,0,0,.18);
@@ -249,7 +201,7 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         box-shadow: 0 0 0 3px rgba(110,168,254,.45);
     }
 
-/* Backdrop behind the drawer */
+/* Drawer (slide-over) */
 #menuBackdrop {
     position: fixed;
     inset: 0;
@@ -268,18 +220,17 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
     opacity: 1;
 }
 
-/* Drawer panel */
 #menuPanel {
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(88vw, 380px);
+    width: min(88vw,380px);
     background: linear-gradient(180deg,#0f1724,#0b1220);
     border-left: 1px solid var(--ring);
     box-shadow: -16px 0 40px rgba(0,0,0,.35);
     transform: translateX(102%);
-    transition: transform .18s ease-out, box-shadow .18s ease-out;
+    transition: transform .18s ease-out;
     z-index: 9999;
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -289,7 +240,6 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         transform: translateX(0);
     }
 
-    /* Panel header (title + close) */
     #menuPanel .sheet-head {
         display: flex;
         align-items: center;
@@ -304,7 +254,6 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         letter-spacing: .3px;
     }
 
-/* Close button */
 #closeMenu {
     display: inline-flex;
     align-items: center;
@@ -316,7 +265,7 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
     background: linear-gradient(180deg,#172031,#121a28);
     color: var(--text);
     cursor: pointer;
-    transition: transform .12s ease, filter .12s ease;
+    transition: transform .12s ease,filter .12s ease;
 }
 
     #closeMenu:hover {
@@ -329,43 +278,11 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         box-shadow: 0 0 0 3px rgba(110,168,254,.45);
     }
 
-/* Menu list area */
 #menuPanel .sheet-body {
-    padding: 10px 10px 16px 10px;
+    padding: 10px 10px 16px;
     overflow: auto;
 }
 
-.menu-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 6px;
-}
-
-.menu-link {
-    display: block;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--ring);
-    background: linear-gradient(180deg,#172031,#121a28);
-    color: var(--text);
-    text-decoration: none;
-    font-weight: 700;
-    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
-}
-
-    .menu-link:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.04);
-        box-shadow: 0 3px 10px rgba(0,0,0,.18);
-    }
-
-    .menu-link:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
-    }
-
-/* Panel footer (optional helper text) */
 #menuPanel .sheet-foot {
     padding: 12px 16px;
     border-top: 1px solid var(--ring);
@@ -373,81 +290,7 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
     font-size: 12px;
 }
 
-/* Light theme refinements */
-@media (prefers-color-scheme: light) {
-    #menuPanel {
-        background: linear-gradient(180deg,#fafbfd,#eef2f7);
-    }
-
-    .menu-link {
-        background: linear-gradient(180deg,#f4f6fa,#e9edf4);
-    }
-}
-
-
-/* --- Category pills in the drawer (on brand) --- */
-.menu-list {
-    display: grid;
-    gap: 8px;
-    padding: 8px;
-}
-
-/* pill look, same gradient/border/hover as site buttons */
-.menu-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 999px; /* pill */
-    border: 1px solid var(--ring);
-    background: linear-gradient(180deg,#172031,#121a28);
-    color: var(--text);
-    text-decoration: none;
-    font-weight: 800;
-    letter-spacing: .2px;
-    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
-}
-
-    /* label & chevron */
-    .menu-link::after {
-        content: "›";
-        opacity: .6;
-        font-weight: 900;
-        transform: translateX(0);
-        transition: transform .12s ease, opacity .12s ease;
-    }
-
-    .menu-link:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.04);
-        box-shadow: 0 3px 10px rgba(0,0,0,.18);
-    }
-
-        .menu-link:hover::after {
-            transform: translateX(2px);
-            opacity: .9;
-        }
-
-    .menu-link:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
-    }
-
-    /* active category highlight */
-    .menu-link[aria-current="page"] {
-        border-color: #19c37d;
-        box-shadow: 0 0 0 1px rgba(25,195,125,.35) inset, 0 0 10px rgba(25,195,125,.25);
-    }
-
-/* light mode tweaks */
-@media (prefers-color-scheme: light) {
-    .menu-link {
-        background: linear-gradient(180deg,#f4f6fa,#e9edf4);
-    }
-}
-
-/* --- Force drawer categories to render as on-brand pills --- */
+/* Drawer category pills */
 #menuPanel .menu-list {
     display: grid;
     gap: 10px;
@@ -460,14 +303,14 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
     justify-content: space-between;
     gap: 10px;
     padding: 12px 14px;
-    border-radius: 999px; /* pill */
+    border-radius: 999px;
     border: 1px solid var(--ring);
     background: linear-gradient(180deg,#172031,#121a28);
     color: var(--text);
-    text-decoration: none !important; /* override any global underline */
+    text-decoration: none !important;
     font-weight: 800;
     letter-spacing: .2px;
-    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+    transition: transform .12s ease,filter .12s ease,box-shadow .12s ease;
 }
 
     #menuPanel .menu-link:hover {
@@ -476,17 +319,11 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         box-shadow: 0 3px 10px rgba(0,0,0,.18);
     }
 
-    #menuPanel .menu-link:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(110,168,254,.45);
-    }
-
     #menuPanel .menu-link::after {
         content: "›";
         opacity: .6;
         font-weight: 900;
-        transform: translateX(0);
-        transition: transform .12s ease, opacity .12s ease;
+        transition: transform .12s ease,opacity .12s ease;
     }
 
     #menuPanel .menu-link:hover::after {
@@ -494,15 +331,18 @@ html, body { margin: 0; height: 100%; background: radial-gradient(1200px 1200px 
         opacity: .9;
     }
 
-    /* Active category highlight */
     #menuPanel .menu-link[aria-current="page"] {
         border-color: #19c37d;
-        box-shadow: 0 0 0 1px rgba(25,195,125,.35) inset, 0 0 10px rgba(25,195,125,.25);
+        box-shadow: 0 0 0 1px rgba(25,195,125,.35) inset,0 0 10px rgba(25,195,125,.25);
     }
 
-/* Light mode surface */
-@media (prefers-color-scheme: light) {
-    #menuPanel .menu-link {
-        background: linear-gradient(180deg,#f4f6fa,#e9edf4);
+/* Light mode */
+@media (prefers-color-scheme:light) {
+    #menuPanel {
+        background: linear-gradient(180deg,#fafbfd,#eef2f7);
     }
+
+        #menuPanel .menu-link {
+            background: linear-gradient(180deg,#f4f6fa,#e9edf4);
+        }
 }
