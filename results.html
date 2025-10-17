@@ -135,6 +135,12 @@
                     menuList.innerHTML = cats.length
                         ? cats.map(cat => `<a role="menuitem" class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
                         : `<div class="muted">No categories available.</div>`;
+                    // highlight the active category (after links exist)
+                    const activeHref = gameHref(defaultCat);
+                    menuList.querySelectorAll('.menu-link').forEach(a => {
+                        if (a.getAttribute('href') === activeHref) a.setAttribute('aria-current', 'page');
+                    });
+
                     return;
                 }
 
