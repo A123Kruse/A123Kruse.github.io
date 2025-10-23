@@ -85,25 +85,27 @@
     </div>
 
     <main class="board">
-      <div id="status" class="small">Select every AI image (or choose “None are AI”).</div>
+        <div id="status" class="small">Select every AI image (or choose “None are AI”).</div>
 
-      <div id="cards" class="cards grid9"></div>
+        <div id="cards" class="cards grid9"></div>
 
-      <div class="controls-row">
-        <button id="submitBtn" class="btn-main" disabled>Submit</button>
-        <button id="noneBtn" class="btn-ghost">None are AI</button>
-        <span class="pill-inline small-muted" id="selCountPill">Selected: 0</span>
-      </div>
+        <div class="controls-row">
+            <button id="submitBtn" class="btn-main" disabled>Submit</button>
+            <button id="noneBtn" class="btn-ghost">None are AI</button>
+            <span class="pill-inline small-muted" id="selCountPill">Selected: 0</span>
+        </div>
 
-      <p class="hint small">Shortcuts: press 1–9 to toggle tiles, <b>S</b> to submit, <b>N</b> for next, <b>0</b> = “None”.</p>
+        <p class="hint small">
+            Shortcuts: press 1–9 to toggle tiles, <b>R</b> to reveal, <b>N</b> for next, <b>0</b> = “None”.
+        </p>
 
-      <div class="controls-row">
-        <button id="nextBtn" class="btn-main" disabled>Next</button>
-        <button id="restartBtn" class="btn-main" style="display:none">Restart</button>
-      </div>
+        <div class="controls-row">
+            <button id="nextBtn" class="btn-main" disabled>Next</button>
+            <button id="restartBtn" class="btn-main" style="display:none">Restart</button>
+        </div>
 
-      <div id="error" class="error"></div>
-      <p class="sr-only" id="ariaLive"></p>
+        <div id="error" class="error"></div>
+        <p class="sr-only" id="ariaLive"></p>
     </main>
 
     <!-- Streak popup (toast + confetti) -->
@@ -367,27 +369,27 @@
             el.next.addEventListener('click', next);
             el.restart.addEventListener('click', () => { state.i = 0; state.score = 0; state.aiStreak = 0; state.bestStreak = 0; state.breakdown = {}; renderRound(); });
 
-            // Keyboard shortcuts
-            window.onkeydown = (e) => {
-              const k = e.key.toLowerCase();
-              if (!state.revealed) {
-                // 1–9 toggles
-                if (k >= '1' && k <= '9') {
-                  const idx = Number(k) - 1;
-                  const card = el.cards.querySelector(`.card[data-index="${idx}"]`);
-                  if (card) toggleSelect(idx, card);
-                }
-                if (k === '0') { el.none.dataset.clicked = '1'; submit(); } // "None are AI"
-                if (k === 's') submit();
-              }
-              if (k === 'n') next();
-            };
+                // Keyboard shortcuts
+                window.onkeydown = (e) => {
+                    const k = e.key.toLowerCase();
+                    if (!state.revealed) {
+                        // 1–9 toggles
+                        if (k >= '1' && k <= '9') {
+                            const idx = Number(k) - 1;
+                            const card = el.cards.querySelector(`.card[data-index="${idx}"]`);
+                            if (card) toggleSelect(idx, card);
+                        }
+                        if (k === '0') { el.none.dataset.clicked = '1'; submit(); } // "None are AI"
+                        if (k === 'r') submit();  // ⬅️ changed from 's' to 'r'
+                    }
+                    if (k === 'n') next();
+                };
 
-            renderRound();
-          } catch (e) {
-            el.error.textContent = e.message || 'Failed to start 9-grid.';
-            console.error('[grid boot error]', e);
-          }
+                renderRound();
+            } catch (e) {
+                el.error.textContent = e.message || 'Failed to start 9-grid.';
+                console.error('[grid boot error]', e);
+            }
         }
 
         // publish a real toast function (replacing guard if your confetti CSS is present)
