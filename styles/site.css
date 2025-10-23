@@ -64,3 +64,59 @@ h1, h2, h3,
 .center-y {
     margin: auto; /* pushes wrapper to center vertically */
 }
+
+
+/* 9-Grid button — matches hero cards */
+.evil-cta {
+    display: grid;
+    gap: 10px;
+    margin: 6px 0 14px;
+    justify-items: end; /* push to the right, like your screenshot */
+}
+
+    .evil-cta .card {
+        width: min(280px, 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid var(--ring);
+        background: var(--card);
+        box-shadow: 0 6px 18px rgba(0,0,0,.32), inset 0 0 0 1px rgba(255,255,255,.03);
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+        .evil-cta .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0,0,0,.38), 0 0 22px rgba(255, 0, 110, .25);
+        }
+
+        .evil-cta .card .label {
+            top: 8px;
+            left: 8px;
+            letter-spacing: .4px;
+            font-weight: 800;
+        }
+
+    .evil-cta .frame {
+        aspect-ratio: 4 / 3; /* consistent with the rest of the site */
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 30%, transparent 31%), radial-gradient(circle at 70% 60%, rgba(255,255,255,.06) 0 26%, transparent 27%), linear-gradient(180deg, #0e1620, #0b1119);
+        border-bottom: 1px solid var(--ring);
+    }
+
+    .evil-cta img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        filter: contrast(1.05) saturate(1.05);
+    }
+
+    .evil-cta .cta-text {
+        font-weight: 800;
+        text-align: center;
+        padding: 10px 12px 12px;
+        letter-spacing: .3px;
+    }
