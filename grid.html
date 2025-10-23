@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="styles/site.css">
     <link rel="stylesheet" href="styles/streak.css">
     <link rel="stylesheet" href="styles/game-layout.css">
+    <link rel="stylesheet" href="styles/grid-overlays.css">
+
 
     <style>
         .cards.grid9 {
@@ -136,6 +138,10 @@
                 <button id="nextBtn" class="btn-main" disabled>Next</button>
                 <button id="restartBtn" class="btn-main" style="display:none">Restart</button>
             </div>
+
+            <p class="small small-muted" style="text-align:center;margin-top:6px">
+                <strong>Badges:</strong> top-right shows truth (AI/REAL). Bottom-left shows your result (✓/✕).
+            </p>
 
             <div id="error" class="error"></div>
             <p class="sr-only" id="ariaLive"></p>
