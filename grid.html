@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI or Real? — 9-Grid</title>
+
+  <!-- Reuse existing site styles -->
+  <link rel="stylesheet" href="styles/site.css">
+  <link rel="stylesheet" href="styles/streak.css">
+  <link rel="stylesheet" href="styles/game-layout.css">
+
+  <style>
+    /* Page-specific layout tweaks for a 3x3 grid + selectable cards */
+
+    /* 3 columns on >=720px, otherwise it will wrap nicely */
+    .cards.grid9 {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    @media (max-width: 720px) { .cards.grid9 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 440px) { .cards.grid9 { grid-template-columns: 1fr; } }
+
+    /* Selection outline state */
+    .card .frame { border: 2px solid transparent; }
+    .card.is-selected .frame {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(110,168,254,.45);
+    }
+
+    /* Reveal feedback (correct AI vs wrong selection) — matches game vibe */
+    .card.is-ai .frame.revealed {
+      border: 3px solid rgba(25,195,125,0.85);
+      box-shadow: 0 0 14px rgba(25,195,125,.55);
+    }
+    .card.is-wrong .frame.revealed {
+      border: 3px solid rgba(255,92,92,0.85);
+      box-shadow: 0 0 14px rgba(255,92,92,.55);
+    }
+
+    /* Small controls row */
+    .controls-row {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      justify-content: center; margin-top: 10px;
+    }
+    .pill-inline { padding: 6px 10px; border: 1px solid var(--ring); border-radius: 999px; opacity: .8; }
+    .small-muted { color: var(--muted); font-size: 12px; }
+    .board .hint { margin-top: 8px; }
+
+    /* tiny label inside each card, top-left */
+    .card .label {
+      position: absolute; top: 8px; left: 8px;
+      background: rgba(0,0,0,.45); color: #fff; font-weight: 800; font-size: 12px;
+      padding: 4px 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
+    }
+    @media (prefers-color-scheme: light) {
+      .card .label { background: rgba(0,0,0,.1); color: #111; border-color: rgba(0,0,0,.1); }
+    }
+
+    /* allow the frame to keep your global ratio */
+    :root { --card-ratio: 4 / 3; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <a class="link" href="index.html">← Home</a>
+      <div class="title">AI or Real? — 9-Grid</div>
+      <div class="meta" aria-live="polite">
+        <span class="pill" id="scorePill">Score: 0</span>
+        <span class="pill" id="roundPill">Round: –</span>
+        <span class="pill" id="catPill" style="display:none"></span>
+      </div>
+
+      <!-- Progress bar under score (same component as game) -->
+      <div class="top-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Game progress">
+        <span id="topProgress"></span>
+        <span class="progress-label" id="progressLabel">0%</span>
+      </div>
+    </header>
+
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="progress"></div>
+    </div>
+
+    <main class="board">
+      <div id="status" class="small">Select every AI image (or choose “None are AI”).</div>
+
+      <div id="cards" class="cards grid9"></div>
+
+      <div class="controls-row">
+        <button id="submitBtn" class="btn-main" disabled>Submit</button>
+        <button id="noneBtn" class="btn-ghost">None are AI</button>
+        <span class="pill-inline small-muted" id="selCountPill">Selected: 0</span>
+      </div>
+
+      <p class="hint small">Shortcuts: press 1–9 to toggle tiles, <b>S</b> to submit, <b>N</b> for next, <b>0</b> = “None”.</p>
+
+      <div class="controls-row">
+        <button id="nextBtn" class="btn-main" disabled>Next</button>
+        <button id="restartBtn" class="btn-main" style="display:none">Restart</button>
+      </div>
+
+      <div id="error" class="error"></div>
+      <p class="sr-only" id="ariaLive"></p>
+    </main>
+
+    <!-- Streak popup (toast + confetti) -->
+    <div id="streakPop" class="streak-pop" aria-live="polite" aria-atomic="true" hidden>
+      <div class="toast">🔥 Streak ×<span id="streakCount">3</span> — amazing! 🎉</div>
+      <div class="confetti" aria-hidden="true"></div>
+    </div>
+
+    <!-- Guard: toast + error logger (kept BEFORE main script) -->
+    <script>
+      // Safe fallback so __toast never throws during debugging
+      window.__toast = (n = 3) => {
+        const pop = document.getElementById('streakPop');
+        const conf = pop?.querySelector('.confetti');
+        const count = document.getElementById('streakCount');
+        if (!pop || !conf) return;
+        if (count) count.textContent = String(n);
+        conf.innerHTML = '';
+        for (let i = 0; i < 36; i++) {
+          const piece = document.createElement('i');
+          piece.style.setProperty('--x', (5 + Math.random() * 90).toFixed(2));
+          piece.style.setProperty('--t', String(900 + Math.random() * 700));
+          piece.style.setProperty('--d', String(Math.random() * 350));
+          conf.appendChild(piece);
+        }
+        pop.hidden = true; pop.hidden = false; void pop.offsetWidth;
+        pop.classList.add('show');
+        setTimeout(() => { pop.classList.remove('show'); setTimeout(() => { pop.hidden = true; conf.innerHTML = ''; }, 220); }, 1400);
+      };
+
+      // Show exact boot errors on screen and console
+      window.addEventListener('error', (e) => {
+        const box = document.getElementById('error');
+        if (box) box.textContent = `${e.message} @ ${e.filename?.split('/').pop()}:${e.lineno}`;
+        console.error('[boot error]', e.error || e.message, e);
+      });
+    </script>
+
+    <!-- Main grid script -->
+    <script>
+      (function () {
+        const $ = (s, r = document) => r.querySelector(s);
+        const el = {
+          cards: $('#cards'),
+          progress: $('#progress'),
+          score: $('#scorePill'),
+          round: $('#roundPill'),
+          topProgress: $('#topProgress'),
+          progressLabel: $('#progressLabel'),
+          status: $('#status'),
+          error: $('#error'),
+          aria: $('#ariaLive'),
+          streakPop: $('#streakPop'),
+          streakCount: $('#streakCount'),
+          submit: $('#submitBtn'),
+          none: $('#noneBtn'),
+          next: $('#nextBtn'),
+          restart: $('#restartBtn'),
+          selCount: $('#selCountPill')
+        };
+
+        const params = new URLSearchParams(location.search);
+        const ROUNDS = Math.max(1, Math.min(50, Number(params.get('rounds')) || 10)); // configurable via ?rounds=
+        const GRID_SIZE = 9;
+
+        const state = {
+          pool: [],   // all images {src,label,alt,category}
+          i: 0,
+          score: 0,
+          bestStreak: 0,
+          aiStreak: 0,
+          selection: new Set(), // visual indexes [0..8]
+          roundItems: [],       // length 9 for current round
+          revealed: false,
+          breakdown: {}
+        };
+
+        const enc = (s) => encodeURIComponent(String(s || '').trim());
+        const imgSrc = (label, cat, entry) => {
+          const file = typeof entry === 'string' ? entry : (entry?.file ?? entry?.src ?? '');
+          if (!file) return '';
+          const base = label === 'ai' ? 'images/ai' : 'images/real';
+          return `${base}/${enc(cat)}/${enc(file)}`;
+        };
+
+        function updateMeta() {
+          el.score.textContent = `Score: ${state.score}`;
+          el.round.textContent = `Round: ${Math.min(state.i + 1, ROUNDS)} / ${ROUNDS}`;
+          const pct = Math.round((state.i) / ROUNDS * 100);
+          el.progress.style.width = pct + '%';
+          el.progress.parentElement.setAttribute('aria-valuenow', String(pct));
+          if (el.topProgress) {
+            el.topProgress.style.width = pct + '%';
+            if (el.progressLabel) el.progressLabel.textContent = pct + '%';
+            const topBar = document.querySelector('.top-progress');
+            if (topBar) {
+              topBar.setAttribute('aria-valuenow', String(pct));
+              topBar.classList.toggle('is-complete', pct === 100);
+            }
+          }
+          el.selCount.textContent = `Selected: ${state.selection.size}`;
+        }
+
+        function sample9() {
+          // Fisher-Yates on indices for performance
+          const n = state.pool.length;
+          const idxs = Array.from({ length: n }, (_, i) => i);
+          for (let i = n - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+          }
+          const take = idxs.slice(0, GRID_SIZE).map(i => state.pool[i]);
+          return take;
+        }
+
+        function renderRound() {
+          state.selection.clear();
+          state.revealed = false;
+          el.submit.disabled = false;
+          el.none.disabled = false;
+          el.next.disabled = true;
+          el.restart.style.display = 'none';
+          el.cards.innerHTML = '';
+
+          // Get 9 random images from across ALL categories/labels
+          state.roundItems = sample9();
+
+          state.roundItems.forEach((item, visIdx) => {
+            const card = document.createElement('button');
+            card.className = 'card';
+            card.type = 'button';
+            card.dataset.index = String(visIdx);
+            card.innerHTML = `
+              <div class="label">${visIdx + 1}</div>
+              <div class="frame"><img src="${item.src}" alt="${item.alt || ''}"></div>
+            `;
+            card.addEventListener('click', () => toggleSelect(visIdx, card));
+            el.cards.appendChild(card);
+          });
+
+          updateMeta();
+          el.status.textContent = 'Select every AI image (or choose “None are AI”).';
+          if (el.aria) el.aria.textContent = 'New round loaded.';
+        }
+
+        function toggleSelect(visIdx, cardEl) {
+          if (state.revealed) return;
+          if (state.selection.has(visIdx)) state.selection.delete(visIdx);
+          else state.selection.add(visIdx);
+          cardEl.classList.toggle('is-selected');
+          el.selCount.textContent = `Selected: ${state.selection.size}`;
+        }
+
+        function submit() {
+          if (state.revealed) return;
+          state.revealed = true;
+
+          const aiIdxs = new Set(
+            state.roundItems.map((it, i) => it.label === 'ai' ? i : -1).filter(i => i >= 0)
+          );
+          const picked = new Set(state.selection);
+
+          // If user pressed "None are AI", selection is empty but we tag a flag
+          const userSaysNone = el.none.dataset.clicked === '1';
+          delete el.none.dataset.clicked;
+
+          // Mark visuals
+          [...el.cards.querySelectorAll('.card')].forEach((card, i) => {
+            const frame = card.querySelector('.frame');
+            frame.classList.add('revealed');
+            const isAI = aiIdxs.has(i);
+            const pickedThis = picked.has(i);
+            if (isAI) card.classList.add('is-ai');
+            if (pickedThis && !isAI) card.classList.add('is-wrong'); // false positive
+            if (!pickedThis && isAI) card.classList.add('is-wrong'); // missed AI
+          });
+
+          // Determine correctness: you must select exactly all AI (or correctly pick “none”)
+          const exactlyMatches =
+            (!userSaysNone && setEquals(aiIdxs, picked)) ||
+            (userSaysNone && aiIdxs.size === 0 && picked.size === 0);
+
+          if (exactlyMatches) {
+            state.score += 1;
+            state.aiStreak += 1;
+            if (state.aiStreak > state.bestStreak) state.bestStreak = state.aiStreak;
+            el.status.innerHTML = '<strong>Perfect!</strong> You found them all.';
+            try { window.__toast?.(state.aiStreak); } catch {}
+          } else {
+            state.aiStreak = 0;
+            const missed = [...aiIdxs].filter(i => !picked.has(i)).length;
+            const wrong = [...picked].filter(i => !aiIdxs.has(i)).length;
+            el.status.innerHTML =
+              `<strong>Close!</strong> Missed AI: ${missed}, Wrong picks: ${wrong}.`;
+          }
+
+          // Basic breakdown by category (counts tiles)
+          state.roundItems.forEach((it, i) => {
+            const cat = String(it.category || 'all');
+            if (!state.breakdown[cat]) state.breakdown[cat] = { correct: 0, total: 0 };
+            const countedCorrect = (it.label === 'ai' && picked.has(i)) || (it.label === 'real' && !picked.has(i));
+            state.breakdown[cat].total += 1;
+            if (countedCorrect) state.breakdown[cat].correct += 1;
+          });
+
+          el.submit.disabled = true;
+          el.none.disabled = true;
+          el.next.disabled = false;
+          updateMeta();
+          if (el.aria) el.aria.textContent = exactlyMatches ? 'Round correct.' : 'Round incorrect.';
+        }
+
+        function next() {
+          if (state.i >= ROUNDS - 1) return finish();
+          state.i += 1;
+          renderRound();
+        }
+
+        function finish() {
+          const total = ROUNDS;
+          const summary = {
+            score: state.score,
+            total,
+            accuracy: total ? Math.round((state.score / total) * 100) : 0,
+            bestStreak: state.bestStreak,
+            breakdown: state.breakdown,
+            lastCategory: 'All (9-Grid)',
+            ts: Date.now(),
+          };
+          try { sessionStorage.setItem('ai-or-real:summary', JSON.stringify(summary)); } catch {}
+          window.location.href = 'results.html';
+        }
+
+        function setEquals(a, b) {
+          if (a.size !== b.size) return false;
+          for (const v of a) if (!b.has(v)) return false;
+          return true;
+        }
+
+        async function boot() {
+          try {
+            const res = await fetch('images/manifest.json', { cache: 'no-store' });
+            if (!res.ok) throw new Error(`Failed to load manifest (HTTP ${res.status})`);
+            const manifest = await res.json();
+
+            const pool = [];
+            for (const cat of Object.keys(manifest || {})) {
+              const real = Array.isArray(manifest[cat]?.real) ? manifest[cat].real : [];
+              const ai = Array.isArray(manifest[cat]?.ai) ? manifest[cat].ai : [];
+              real.forEach(entry => pool.push({ src: imgSrc('real', cat, entry), label: 'real', alt: entry?.alt || '', category: cat }));
+              ai.forEach(entry => pool.push({ src: imgSrc('ai', cat, entry), label: 'ai', alt: entry?.alt || '', category: cat }));
+            }
+
+            // Filter out any malformed entries (missing src)
+            state.pool = pool.filter(p => !!p.src);
+            if (state.pool.length < GRID_SIZE) throw new Error('Not enough images to build a 9-grid.');
+
+            // Wire controls
+            el.submit.addEventListener('click', submit);
+            el.none.addEventListener('click', () => { if (!state.revealed) { el.none.dataset.clicked = '1'; submit(); } });
+            el.next.addEventListener('click', next);
+            el.restart.addEventListener('click', () => { state.i = 0; state.score = 0; state.aiStreak = 0; state.bestStreak = 0; state.breakdown = {}; renderRound(); });
+
+            // Keyboard shortcuts
+            window.onkeydown = (e) => {
+              const k = e.key.toLowerCase();
+              if (!state.revealed) {
+                // 1–9 toggles
+                if (k >= '1' && k <= '9') {
+                  const idx = Number(k) - 1;
+                  const card = el.cards.querySelector(`.card[data-index="${idx}"]`);
+                  if (card) toggleSelect(idx, card);
+                }
+                if (k === '0') { el.none.dataset.clicked = '1'; submit(); } // "None are AI"
+                if (k === 's') submit();
+              }
+              if (k === 'n') next();
+            };
+
+            renderRound();
+          } catch (e) {
+            el.error.textContent = e.message || 'Failed to start 9-grid.';
+            console.error('[grid boot error]', e);
+          }
+        }
+
+        // publish a real toast function (replacing guard if your confetti CSS is present)
+        window.__fireStreakToast = (n) => window.__toast?.(n);
+
+        boot();
+      })();
+    </script>
+  </div>
+</body>
+</html>
