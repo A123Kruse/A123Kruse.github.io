@@ -1,0 +1,33 @@
+/* --- Uniform Category Thumbnails --- */
+.thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;        /* consistent ratio */
+  overflow: hidden;
+  border-bottom: 1px solid var(--ring);
+  background: #0c141d;        /* same background as cards */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;          /* crop instead of stretching */
+  object-position: center;    /* center the focus */
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+/* Optional: add hover zoom polish */
+.thumb:hover img {
+  transform: scale(1.05);
+}
+
+/* Optional: keep the whole grid uniform */
+.grid .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
