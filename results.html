@@ -1,106 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- shared base styles -->
   <link rel="stylesheet" href="styles/site.css">
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AI or Real? – Results</title>
-
-  <!-- results page styles (includes hamburger menu) -->
   <link rel="stylesheet" href="results.css">
 </head>
 <body>
-    <main class="wrap">
-        <header class="bar">
-            <a class="btn" href="index.html">← Home</a>
-            <h1>Results</h1>
+  <main class="wrap">
+    <header class="bar">
+      <a class="btn" href="index.html">← Home</a>
+      <h1>Results</h1>
+      <div id="runType" class="muted" style="margin-top:4px;"></div>
 
-            <!-- Right-side controls -->
-            <div class="header-actions">
-                <a id="playAgain" class="btn primary">Play Again</a>
+      <div class="header-actions">
+        <a id="playAgain" class="btn primary">Play Again</a>
 
-                <!-- Single hamburger trigger -->
-                <button id="menuBtn" class="hamburger" aria-label="Open category menu" aria-controls="menuPanel" aria-expanded="false">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
+        <button id="menuBtn" class="hamburger" aria-label="Open category menu" aria-controls="menuPanel" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
 
-            <!-- Single slide-over panel -->
-            <aside id="menuPanel" hidden>
-                <div class="sheet-head">
-                    <div class="sheet-title">Categories</div>
-                    <button id="closeMenu" aria-label="Close">✕</button>
-                </div>
-                <div class="sheet-body">
-                    <nav id="menuList" class="menu-list" role="menu"></nav>
-                </div>
-                <div class="sheet-foot">Tip: you can switch categories anytime.</div>
-            </aside>
+      <aside id="menuPanel" hidden>
+        <div class="sheet-head">
+          <div class="sheet-title">Categories</div>
+          <button id="closeMenu" aria-label="Close">✕</button>
+        </div>
+        <div class="sheet-body">
+          <nav id="menuList" class="menu-list" role="menu"></nav>
+        </div>
+        <div class="sheet-foot">Tip: you can switch categories anytime.</div>
+      </aside>
+      <div id="menuBackdrop" hidden></div>
+    </header>
 
-            <!-- Single backdrop -->
-            <div id="menuBackdrop" hidden></div>
-        </header>
+    <section id="summary" class="cards"></section>
 
+    <section id="breakdown" class="card">
+      <h2>Category Breakdown</h2>
+      <div id="tableWrap"></div>
+    </section>
+  </main>
 
-        <section id="summary" class="cards"></section>
+  <script>
+    (() => {
+      const $ = (sel) => document.querySelector(sel);
 
-        <section id="breakdown" class="card">
-            <h2>Category Breakdown</h2>
-            <div id="tableWrap"></div>
-        </section>
-    </main>
+      const summaryEl = $('#summary');
+      const tableWrap = $('#tableWrap');
+      const playAgain = $('#playAgain');
+      const runType = $('#runType');
 
-    <script>
-        (() => {
-            const $ = (sel) => document.querySelector(sel);
+      const menuBtn = $('#menuBtn');
+      const menuPanel = $('#menuPanel');
+      const menuList = $('#menuList');
+      const closeMenu = $('#closeMenu');
+      const backdrop = $('#menuBackdrop');
 
-            const summaryEl = $('#summary');
-            const tableWrap = $('#tableWrap');
-            const playAgain = $('#playAgain');
+      const gameHref = (cat) => {
+        const p = new URLSearchParams();
+        if (cat) p.set('cat', cat);
+        return 'game.html' + (p.toString() ? '?' + p.toString() : '');
+      };
 
-            const menuBtn = $('#menuBtn');
-            const menuPanel = $('#menuPanel');
-            const menuList = $('#menuList');
-            const closeMenu = $('#closeMenu');
-            const backdrop = $('#menuBackdrop');
+      const gridHref = () => 'grid.html';
 
-            const gameHref = (cat) => {
-                const p = new URLSearchParams();
-                if (cat) p.set('cat', cat);
-                return 'game.html' + (p.toString() ? '?' + p.toString() : '');
-            };
+      const raw = sessionStorage.getItem('ai-or-real:summary');
+      if (!raw) {
+        if (summaryEl) summaryEl.innerHTML =
+          `<div class="card"><p>No results found. <a href="game.html">Play a round</a>.</p></div>`;
+        if (playAgain) playAgain.href = 'game.html';
+        return;
+      }
 
-            const raw = sessionStorage.getItem('ai-or-real:summary');
-            if (!raw) {
-                if (summaryEl) summaryEl.innerHTML = `
-          <div class="card"><p>No results found. <a href="game.html">Play a round</a>.</p></div>`;
-                if (playAgain) playAgain.href = 'game.html';
-                return;
-            }
+      const data = JSON.parse(raw);
+      const {
+        score = 0,
+        total = 0,
+        accuracy = 0,
+        bestStreak = 0,
+        breakdown = {},
+        lastCategory = '',
+        categories = []
+      } = data;
 
-            const data = JSON.parse(raw);
-            const { score = 0, total = 0, accuracy = 0, bestStreak = 0, breakdown = {}, lastCategory = '', categories = [] } = data;
+      const isGrid = lastCategory === 'All (9-Grid)';
+      if (isGrid && runType) runType.textContent = 'You played a 9-Grid run.';
 
-            let defaultCat = lastCategory || (categories[0] || '') || (Object.keys(breakdown)[0] || '');
+      let defaultCat = lastCategory || (categories[0] || '') || (Object.keys(breakdown)[0] || '');
 
-            if (summaryEl) {
-                summaryEl.innerHTML = `
+      if (summaryEl) {
+        summaryEl.innerHTML = `
           <div class="card kpis">
             <div><div class="k">Score</div><div class="v">${score}/${total}</div></div>
             <div><div class="k">Accuracy</div><div class="v">${accuracy}%</div></div>
             <div><div class="k">Best AI Streak</div><div class="v">${bestStreak || 0}×</div></div>
           </div>`;
-            }
+      }
 
-            if (tableWrap) {
-                const rows = Object.entries(breakdown).map(([cat, v]) => {
-                    const pct = v.total ? Math.round((v.correct / v.total) * 100) : 0;
-                    return `<tr><td>${cat}</td><td>${v.correct}/${v.total}</td><td>${pct}%</td></tr>`;
-                }).join('') || `<tr><td colspan="3">No category data.</td></tr>`;
+      if (tableWrap) {
+        const rows = Object.entries(breakdown).map(([cat, v]) => {
+          const pct = v.total ? Math.round((v.correct / v.total) * 100) : 0;
+          return `<tr><td>${cat}</td><td>${v.correct}/${v.total}</td><td>${pct}%</td></tr>`;
+        }).join('') || `<tr><td colspan="3">No category data.</td></tr>`;
 
-                tableWrap.innerHTML = `
+        tableWrap.innerHTML = `
           <table class="stats">
             <thead><tr><th>Category</th><th>Correct</th><th>Accuracy</th></tr></thead>
             <tbody>${rows}</tbody>
@@ -109,77 +114,64 @@
             <a class="btn primary" id="playAgain2">Play Again</a>
             <a class="btn ghost" href="categories.html">View Categories</a>
           </div>`;
-            }
+      }
 
-            // Wire Play Again buttons
-            const pa2 = $('#playAgain2');
+      const pa2 = $('#playAgain2');
+      const nextHref = isGrid ? gridHref() : gameHref(defaultCat);
+      if (playAgain) playAgain.href = nextHref;
+      if (pa2) pa2.href = nextHref;
+
+      // Build categories list
+      async function renderCategories() {
+        let cats = [];
+        try {
+          const res = await fetch('images/manifest.json', { cache: 'no-store' });
+          if (res.ok) cats = Object.keys(await res.json()).sort((a, b) => a.localeCompare(b));
+        } catch {}
+        if (!cats.length) cats = (categories.length ? categories : Object.keys(breakdown)).sort();
+
+        if (!defaultCat && cats.length) {
+          defaultCat = cats[0];
+          if (!isGrid) {
             if (playAgain) playAgain.href = gameHref(defaultCat);
-            if (pa2) pa2.href = playAgain ? playAgain.href : gameHref(defaultCat);
+            if (pa2) pa2.href = gameHref(defaultCat);
+          }
+        }
 
-            // Build categories list (hamburger)
-            async function renderCategories() {
-                let cats = [];
-                try {
-                    const res = await fetch('images/manifest.json', { cache: 'no-store' });
-                    if (res.ok) cats = Object.keys(await res.json()).sort((a, b) => a.localeCompare(b));
-                } catch { }
-                if (!cats.length) cats = (categories.length ? categories : Object.keys(breakdown)).sort();
+        if (menuList) {
+          menuList.innerHTML = cats.length
+            ? cats.map(cat => `<a role="menuitem" class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
+            : `<div class="muted">No categories available.</div>`;
+        }
+      }
+      renderCategories();
 
-                if (!defaultCat && cats.length) {
-                    defaultCat = cats[0];
-                    if (playAgain) playAgain.href = gameHref(defaultCat);
-                    if (pa2) pa2.href = gameHref(defaultCat);
-                }
-
-                if (menuList) {
-                    menuList.innerHTML = cats.length
-                        ? cats.map(cat => `<a role="menuitem" class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
-                        : `<div class="muted">No categories available.</div>`;
-                    return;
-                }
-
-                const host = document.createElement('section');
-                host.className = 'card';
-                host.innerHTML = `
-          <h2>Categories</h2>
-          <nav class="menu-list">
-            ${cats.length
-                        ? cats.map(cat => `<a class="menu-link" href="${gameHref(cat)}">${cat}</a>`).join('')
-                        : `<div class="muted">No categories available.</div>`}
-          </nav>`;
-                if (summaryEl) summaryEl.insertAdjacentElement('afterend', host);
-            }
-            renderCategories();
-
-            // Hamburger open/close
-            if (menuBtn && menuPanel && backdrop) {
-                const openMenu = () => {
-                    menuPanel.hidden = false;
-                    backdrop.hidden = false;
-                    document.body.style.overflow = 'hidden';
-                    menuBtn.setAttribute('aria-expanded', 'true');
-                    requestAnimationFrame(() => menuPanel.classList.add('show'));
-                };
-                const closeMenuPanel = () => {
-                    menuPanel.classList.remove('show');
-                    menuBtn.setAttribute('aria-expanded', 'false');
-                    setTimeout(() => {
-                        menuPanel.hidden = true;
-                        backdrop.hidden = true;
-                        document.body.style.overflow = '';
-                    }, 150);
-                };
-                menuBtn.addEventListener('click', openMenu);
-                if (closeMenu) closeMenu.addEventListener('click', closeMenuPanel);
-                backdrop.addEventListener('click', closeMenuPanel);
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && !menuPanel.hidden) closeMenuPanel();
-                });
-            }
-        })();
-    </script>
-
+      // Hamburger open/close
+      if (menuBtn && menuPanel && backdrop) {
+        const openMenu = () => {
+          menuPanel.hidden = false;
+          backdrop.hidden = false;
+          document.body.style.overflow = 'hidden';
+          menuBtn.setAttribute('aria-expanded', 'true');
+          requestAnimationFrame(() => menuPanel.classList.add('show'));
+        };
+        const closeMenuPanel = () => {
+          menuPanel.classList.remove('show');
+          menuBtn.setAttribute('aria-expanded', 'false');
+          setTimeout(() => {
+            menuPanel.hidden = true;
+            backdrop.hidden = true;
+            document.body.style.overflow = '';
+          }, 150);
+        };
+        menuBtn.addEventListener('click', openMenu);
+        if (closeMenu) closeMenu.addEventListener('click', closeMenuPanel);
+        backdrop.addEventListener('click', closeMenuPanel);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && !menuPanel.hidden) closeMenuPanel();
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
-
-
