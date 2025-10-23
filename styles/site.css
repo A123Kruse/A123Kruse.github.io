@@ -120,3 +120,24 @@ h1, h2, h3,
         padding: 10px 12px 12px;
         letter-spacing: .3px;
     }
+
+    /* Smaller Evil */
+    .evil-cta.small {
+        margin-top: 18px;
+        justify-items: center;
+    }
+
+        .evil-cta.small .card {
+            width: 200px;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.25);
+        }
+
+        .evil-cta.small .frame {
+            aspect-ratio: 4/3;
+        }
+
+        .evil-cta.small .cta-text {
+            font-size: 13px;
+            padding: 8px 10px 10px;
+        }
