@@ -90,7 +90,7 @@
         <div id="cards" class="cards grid9"></div>
 
         <div class="controls-row">
-            <button id="submitBtn" class="btn-main" disabled>Submit</button>
+            <button id="submitBtn" class="btn-main" disabled aria-label="Reveal">Reveal</button>
             <button id="noneBtn" class="btn-ghost">None are AI</button>
             <span class="pill-inline small-muted" id="selCountPill">Selected: 0</span>
         </div>
@@ -247,7 +247,7 @@
           });
 
           updateMeta();
-          el.status.textContent = 'Select every AI image (or choose “None are AI”).';
+            el.status.textContent = 'Select every AI image (or choose “None are AI”), then press R to reveal.';
           if (el.aria) el.aria.textContent = 'New round loaded.';
         }
 
@@ -259,6 +259,13 @@
           el.selCount.textContent = `Selected: ${state.selection.size}`;
         }
 
+          function clearSelections() {
+              state.selection.clear();
+              el.selCount.textContent = 'Selected: 0';
+              el.cards.querySelectorAll('.card.is-selected').forEach(c => c.classList.remove('is-selected'));
+          }
+
+
         function submit() {
           if (state.revealed) return;
           state.revealed = true;
@@ -269,8 +276,14 @@
           const picked = new Set(state.selection);
 
           // If user pressed "None are AI", selection is empty but we tag a flag
-          const userSaysNone = el.none.dataset.clicked === '1';
-          delete el.none.dataset.clicked;
+            el.none.addEventListener('click', () => {
+                if (!state.revealed) {
+                    clearSelections();
+                    el.none.dataset.clicked = '1';
+                    submit();
+                }
+            });
+
 
           // Mark visuals
           [...el.cards.querySelectorAll('.card')].forEach((card, i) => {
@@ -369,21 +382,26 @@
             el.next.addEventListener('click', next);
             el.restart.addEventListener('click', () => { state.i = 0; state.score = 0; state.aiStreak = 0; state.bestStreak = 0; state.breakdown = {}; renderRound(); });
 
-                // Keyboard shortcuts
-                window.onkeydown = (e) => {
-                    const k = e.key.toLowerCase();
-                    if (!state.revealed) {
-                        // 1–9 toggles
-                        if (k >= '1' && k <= '9') {
-                            const idx = Number(k) - 1;
-                            const card = el.cards.querySelector(`.card[data-index="${idx}"]`);
-                            if (card) toggleSelect(idx, card);
-                        }
-                        if (k === '0') { el.none.dataset.clicked = '1'; submit(); } // "None are AI"
-                        if (k === 'r') submit();  // ⬅️ changed from 's' to 'r'
-                    }
-                    if (k === 'n') next();
-                };
+              // Keyboard shortcuts block
+              window.onkeydown = (e) => {
+                  const k = e.key.toLowerCase();
+                  if (!state.revealed) {
+                      if (k >= '1' && k <= '9') {
+                          const idx = Number(k) - 1;
+                          const card = el.cards.querySelector(`.card[data-index="${idx}"]`);
+                          if (card) toggleSelect(idx, card);
+                      }
+                      if (k === '0') {
+                          // Assert "None are AI" => clear selection for clarity, then reveal
+                          clearSelections();
+                          el.none.dataset.clicked = '1';
+                          submit();
+                      }
+                      if (k === 'r') submit();   // Reveal
+                  }
+                  if (k === 'n' && state.revealed) next();  // ⬅ only after reveal
+              };
+
 
                 renderRound();
             } catch (e) {
